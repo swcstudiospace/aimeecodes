@@ -1,0 +1,30 @@
+[package]
+name = "omega_anda_icp"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+description = "ICP / eternal durability backends for Omega Anda session pathways"
+
+[features]
+default = []
+# Future: real ic-oss client wiring
+ic-oss = []
+
+[dependencies]
+anyhow.workspace = true
+async-trait.workspace = true
+chrono.workspace = true
+derive_setters.workspace = true
+hex.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+omega_anda = { path = "../omega_anda" }
+
+[dev-dependencies]
+pretty_assertions.workspace = true
+tempfile.workspace = true
+tokio = { workspace = true, features = ["macros", "rt", "time", "test-util"] }

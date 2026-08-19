@@ -1,0 +1,33 @@
+[package]
+name = "omega_api"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+url.workspace = true
+async-trait.workspace = true
+omega_domain.workspace = true
+omega_stream.workspace = true
+omega_services.workspace = true
+omega_repo.workspace = true
+omega_infra.workspace = true
+futures.workspace = true
+
+
+
+
+
+
+
+
+omega_app.workspace = true
+serde_json.workspace = true
+omega_config.workspace = true
+
+[dev-dependencies]
+
+tokio = { workspace = true }
+
+

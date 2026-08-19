@@ -1,0 +1,5 @@
+[print_schema]
+file = "crates/omega_repo/src/database/schema.rs"
+
+[migrations_directory]
+dir = "crates/omega_repo/src/database/migrations"

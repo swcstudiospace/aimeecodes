@@ -1,0 +1,91 @@
+[package]
+name = "omega_main"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "omega"
+path = "src/main.rs"
+
+
+[dependencies]
+thiserror = { workspace = true }
+clap.workspace = true
+clap_complete.workspace = true
+console.workspace = true
+omega_app.workspace = true
+omega_api.workspace = true
+omega_domain.workspace = true
+omega_config.workspace = true
+omega_walker.workspace = true
+omega_display.workspace = true
+omega_tracker.workspace = true
+bstr.workspace = true
+
+omega_spinner.workspace = true
+omega_select.workspace = true
+
+merge.workspace = true
+nucleo.workspace = true
+nucleo-picker.workspace = true
+libc = "0.2"
+omega_fs.workspace = true
+tokio.workspace = true
+tokio-stream.workspace = true
+futures.workspace = true
+colored.workspace = true
+
+anyhow.workspace = true
+derive_setters.workspace = true
+lazy_static.workspace = true
+rustyline.workspace = true
+nu-ansi-term.workspace = true
+tracing.workspace = true
+chrono.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+toml_edit.workspace = true
+regex.workspace = true
+strum.workspace = true
+strum_macros.workspace = true
+
+convert_case.workspace = true
+gix.workspace = true
+update-informer = { version = "1.2.0", default-features = false, features = [
+    "github",
+    "ureq",
+    "rustls-tls",
+] }
+dirs.workspace = true
+open.workspace = true
+humantime.workspace = true
+num-format.workspace = true
+url.workspace = true
+omega_embed.workspace = true
+include_dir.workspace = true
+indexmap.workspace = true
+async-recursion.workspace = true
+
+omega_markdown_stream.workspace = true
+strip-ansi-escapes.workspace = true
+terminal_size = "0.4"
+rustls.workspace = true
+tempfile.workspace = true
+tiny_http.workspace = true
+ratatui.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+enable-ansi-support.workspace = true
+windows-sys = { version = "0.61", features = ["Win32_System_Console"] }
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
+arboard = "3.4"
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt", "time", "test-util"] }
+insta.workspace = true
+pretty_assertions.workspace = true
+serial_test = "4.0"
+fake = { version = "5.1.0", features = ["derive"] }
+omega_domain = { path = "../omega_domain" }
