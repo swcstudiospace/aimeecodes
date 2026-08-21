@@ -47,10 +47,17 @@ pub fn generate_coderabbit_workflow() {
 
 /// CodeRabbit CLI review invocation used by the generated workflow.
 ///
-/// Current CLI rejects `--plain` (`error: unknown option '--plain'`).
-/// `--committed` is the boolean form of the old `--type committed` flag.
+/// Current CLI rejects `--plain` and `--type`. Non-interactive CI must pass
+/// `--api-key`. Skip cleanly when the repo secret is unset so the PR is not
+/// red for an org-level gap.
 fn coderabbit_review_command() -> &'static str {
-    "coderabbit review --committed"
+    concat!(
+        "if [ -z \"${CODERABBIT_API_KEY:-}\" ]; then ",
+        "echo 'CODERABBIT_API_KEY not set — skipping CodeRabbit review' >&2; ",
+        "exit 0; ",
+        "fi; ",
+        "coderabbit review --committed --api-key \"$CODERABBIT_API_KEY\"",
+    )
 }
 
 #[cfg(test)]
@@ -61,7 +68,13 @@ mod tests {
     fn test_coderabbit_review_command_matches_current_cli() {
         let fixture = super::coderabbit_review_command();
         let actual = fixture;
-        let expected = "coderabbit review --committed";
+        let expected = concat!(
+            "if [ -z \"${CODERABBIT_API_KEY:-}\" ]; then ",
+            "echo 'CODERABBIT_API_KEY not set — skipping CodeRabbit review' >&2; ",
+            "exit 0; ",
+            "fi; ",
+            "coderabbit review --committed --api-key \"$CODERABBIT_API_KEY\"",
+        );
         assert_eq!(actual, expected);
         assert!(
             !actual.contains("--plain"),
@@ -70,6 +83,10 @@ mod tests {
         assert!(
             !actual.contains("--type"),
             "current CodeRabbit CLI uses --committed, not --type committed"
+        );
+        assert!(
+            actual.contains("--api-key"),
+            "non-interactive CI must pass --api-key"
         );
     }
 }
