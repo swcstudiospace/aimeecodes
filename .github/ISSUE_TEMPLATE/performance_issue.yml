@@ -13,7 +13,7 @@ body:
     attributes:
       label: Performance Issue Description
       description: Describe the performance problem you're experiencing
-      placeholder: Omega becomes slow when...
+      placeholder: Aimee becomes slow when...
     validations:
       required: true
 
@@ -90,13 +90,13 @@ body:
       label: Environment Details
       description: |
         Provide details about your environment:
-        - Omega version (`omega --version`)
+        - Aimee version (`aimee --version`)
         - Operating system and version
         - CPU, RAM
         - AI provider and model
         - Shell
       placeholder: |
-        - Omega: 0.1.0
+        - Aimee: 0.1.0
         - OS: macOS 14.1
         - CPU: M2 Pro
         - RAM: 16GB
@@ -110,7 +110,7 @@ body:
     id: config
     attributes:
       label: Configuration
-      description: Share relevant parts of your `omega.yaml` (remove sensitive data)
+      description: Share relevant parts of your `aimee.yaml` (remove sensitive data)
       render: yaml
 
   - type: textarea

@@ -15,36 +15,36 @@
 # - :conversation-rename <id> <name> - Rename specific conversation by ID
 #
 # Helper Functions:
-# - _omega_switch_conversation <id>  - Switch to a conversation and track previous
-# - _omega_clear_conversation        - Clear conversation and save as previous
+# - _aimee_switch_conversation <id>  - Switch to a conversation and track previous
+# - _aimee_clear_conversation        - Clear conversation and save as previous
 
 # Helper function to switch to a conversation and track previous (like cd -)
-function _omega_switch_conversation() {
+function _aimee_switch_conversation() {
     local new_conversation_id="$1"
     
     # Only update previous if we're switching to a different conversation
-    if [[ -n "$_OMEGA_CONVERSATION_ID" && "$_OMEGA_CONVERSATION_ID" != "$new_conversation_id" ]]; then
+    if [[ -n "$_AIMEE_CONVERSATION_ID" && "$_AIMEE_CONVERSATION_ID" != "$new_conversation_id" ]]; then
         # Save current as previous
-        _OMEGA_PREVIOUS_CONVERSATION_ID="$_OMEGA_CONVERSATION_ID"
+        _AIMEE_PREVIOUS_CONVERSATION_ID="$_AIMEE_CONVERSATION_ID"
     fi
     
     # Set the new conversation as active
-    _OMEGA_CONVERSATION_ID="$new_conversation_id"
+    _AIMEE_CONVERSATION_ID="$new_conversation_id"
 }
 
 # Helper function to reset/clear conversation and track previous (like cd -)
-function _omega_clear_conversation() {
+function _aimee_clear_conversation() {
     # Save current as previous before clearing
-    if [[ -n "$_OMEGA_CONVERSATION_ID" ]]; then
-        _OMEGA_PREVIOUS_CONVERSATION_ID="$_OMEGA_CONVERSATION_ID"
+    if [[ -n "$_AIMEE_CONVERSATION_ID" ]]; then
+        _AIMEE_PREVIOUS_CONVERSATION_ID="$_AIMEE_CONVERSATION_ID"
     fi
     
     # Clear the current conversation
-    _OMEGA_CONVERSATION_ID=""
+    _AIMEE_CONVERSATION_ID=""
 }
 
 # Action handler: List/switch conversations
-function _omega_action_conversation() {
+function _aimee_action_conversation() {
     local input_text="$1"
     
     echo
@@ -52,25 +52,25 @@ function _omega_action_conversation() {
     # Handle toggling to previous conversation (like cd -)
     if [[ "$input_text" == "-" ]]; then
         # Check if there's a previous conversation
-        if [[ -z "$_OMEGA_PREVIOUS_CONVERSATION_ID" ]]; then
+        if [[ -z "$_AIMEE_PREVIOUS_CONVERSATION_ID" ]]; then
             # No previous conversation tracked, show conversation list like :conversation
             input_text=""
             # Fall through to the conversation list logic below
         else
             # Swap current and previous
-            local temp="$_OMEGA_CONVERSATION_ID"
-            _OMEGA_CONVERSATION_ID="$_OMEGA_PREVIOUS_CONVERSATION_ID"
-            _OMEGA_PREVIOUS_CONVERSATION_ID="$temp"
+            local temp="$_AIMEE_CONVERSATION_ID"
+            _AIMEE_CONVERSATION_ID="$_AIMEE_PREVIOUS_CONVERSATION_ID"
+            _AIMEE_PREVIOUS_CONVERSATION_ID="$temp"
             
             # Show conversation content
             echo
-            _omega_exec conversation show "$_OMEGA_CONVERSATION_ID"
+            _aimee_exec conversation show "$_AIMEE_CONVERSATION_ID"
             
             # Show conversation info
-            _omega_exec conversation info "$_OMEGA_CONVERSATION_ID"
+            _aimee_exec conversation info "$_AIMEE_CONVERSATION_ID"
             
             # Print log about conversation switching
-            _omega_log success "Switched to conversation \033[1m${_OMEGA_CONVERSATION_ID}\033[0m"
+            _aimee_log success "Switched to conversation \033[1m${_AIMEE_CONVERSATION_ID}\033[0m"
             
             return 0
         fi
@@ -81,49 +81,49 @@ function _omega_action_conversation() {
         local conversation_id="$input_text"
         
         # Switch to conversation and track in history
-        _omega_switch_conversation "$conversation_id"
+        _aimee_switch_conversation "$conversation_id"
         
         # Show conversation content
         echo
-        _omega_exec conversation show "$conversation_id"
+        _aimee_exec conversation show "$conversation_id"
         
         # Show conversation info
-        _omega_exec conversation info "$conversation_id"
+        _aimee_exec conversation info "$conversation_id"
         
         # Print log about conversation switching
-        _omega_log success "Switched to conversation \033[1m${conversation_id}\033[0m"
+        _aimee_log success "Switched to conversation \033[1m${conversation_id}\033[0m"
         
         return 0
     fi
     
     # Use Rust's built-in conversation picker with preview
     local conversation_id
-    conversation_id=$(_omega_select conversation)
+    conversation_id=$(_aimee_select conversation)
     
     if [[ -n "$conversation_id" ]]; then
         # Switch to conversation and track in history
-        _omega_switch_conversation "$conversation_id"
+        _aimee_switch_conversation "$conversation_id"
         
         # Show conversation content
         echo
-        _omega_exec conversation show "$conversation_id"
+        _aimee_exec conversation show "$conversation_id"
         
         # Show conversation info
-        _omega_exec conversation info "$conversation_id"
+        _aimee_exec conversation info "$conversation_id"
         
         # Print log about conversation switching
-        _omega_log success "Switched to conversation \033[1m${conversation_id}\033[0m"
+        _aimee_log success "Switched to conversation \033[1m${conversation_id}\033[0m"
     fi
 }
 
 
 # Action handler: Show nested conversations spawned by current conversation
-function _omega_action_conversation_tree() {
-    _omega_select conversation --parent "$_OMEGA_CONVERSATION_ID"
+function _aimee_action_conversation_tree() {
+    _aimee_select conversation --parent "$_AIMEE_CONVERSATION_ID"
 }
 
 # Action handler: Clone conversation
-function _omega_action_clone() {
+function _aimee_action_clone() {
     local input_text="$1"
     local clone_target="$input_text"
     
@@ -131,35 +131,35 @@ function _omega_action_clone() {
     
     # Handle explicit clone target if provided
     if [[ -n "$clone_target" ]]; then
-        _omega_clone_and_switch "$clone_target"
+        _aimee_clone_and_switch "$clone_target"
         return 0
     fi
     
     # Use Rust's built-in conversation picker
     local conversation_id
-    conversation_id=$(_omega_select conversation)
+    conversation_id=$(_aimee_select conversation)
     
     if [[ -n "$conversation_id" ]]; then
-        _omega_clone_and_switch "$conversation_id"
+        _aimee_clone_and_switch "$conversation_id"
     fi
 }
 
 # Action handler: Copy last assistant message to OS clipboard as raw markdown
 # Usage: :copy
-function _omega_action_copy() {
+function _aimee_action_copy() {
     echo
 
-    if [[ -z "$_OMEGA_CONVERSATION_ID" ]]; then
-        _omega_log error "No active conversation. Start a conversation first or use :conversation to see existing ones"
+    if [[ -z "$_AIMEE_CONVERSATION_ID" ]]; then
+        _aimee_log error "No active conversation. Start a conversation first or use :conversation to see existing ones"
         return 0
     fi
 
     # Fetch raw markdown from the last assistant message
     local content
-    content=$($_OMEGA_BIN conversation show --md "$_OMEGA_CONVERSATION_ID" 2>/dev/null)
+    content=$($_AIMEE_BIN conversation show --md "$_AIMEE_CONVERSATION_ID" 2>/dev/null)
 
     if [[ -z "$content" ]]; then
-        _omega_log error "No assistant message found in the current conversation"
+        _aimee_log error "No assistant message found in the current conversation"
         return 0
     fi
 
@@ -171,7 +171,7 @@ function _omega_action_copy() {
     elif command -v xsel &>/dev/null; then
         echo -n "$content" | xsel --clipboard --input
     else
-        _omega_log error "No clipboard utility found (pbcopy, xclip, or xsel required)"
+        _aimee_log error "No clipboard utility found (pbcopy, xclip, or xsel required)"
         return 0
     fi
 
@@ -180,32 +180,32 @@ function _omega_action_copy() {
     line_count=$(echo "$content" | wc -l | tr -d ' ')
     byte_count=$(echo -n "$content" | wc -c | tr -d ' ')
 
-    _omega_log success "Copied to clipboard \033[90m[${line_count} lines, ${byte_count} bytes]\033[0m"
+    _aimee_log success "Copied to clipboard \033[90m[${line_count} lines, ${byte_count} bytes]\033[0m"
 }
 
 # Action handler: Rename current conversation
 # Usage: :rename <name>
-function _omega_action_rename() {
+function _aimee_action_rename() {
     local input_text="$1"
 
     echo
 
-    if [[ -z "$_OMEGA_CONVERSATION_ID" ]]; then
-        _omega_log error "No active conversation. Start a conversation first or use :conversation to select one"
+    if [[ -z "$_AIMEE_CONVERSATION_ID" ]]; then
+        _aimee_log error "No active conversation. Start a conversation first or use :conversation to select one"
         return 0
     fi
 
     if [[ -z "$input_text" ]]; then
-        _omega_log error "Usage: :rename <name>"
+        _aimee_log error "Usage: :rename <name>"
         return 0
     fi
 
-    _omega_exec conversation rename "$_OMEGA_CONVERSATION_ID" $input_text
+    _aimee_exec conversation rename "$_AIMEE_CONVERSATION_ID" $input_text
 }
 
 # Action handler: Rename a conversation (interactive picker or by ID)
 # Usage: :conversation-rename [<id> <name>]
-function _omega_action_conversation_rename() {
+function _aimee_action_conversation_rename() {
     local input_text="$1"
 
     echo
@@ -217,17 +217,17 @@ function _omega_action_conversation_rename() {
 
         if [[ "$conversation_id" == "$new_name" ]]; then
             # Only one arg provided — not enough
-            _omega_log error "Usage: :conversation-rename <id> <name>"
+            _aimee_log error "Usage: :conversation-rename <id> <name>"
             return 0
         fi
 
-        _omega_exec conversation rename "$conversation_id" $new_name
+        _aimee_exec conversation rename "$conversation_id" $new_name
         return 0
     fi
 
     # No args — use Rust's built-in conversation picker
     local conversation_id
-    conversation_id=$(_omega_select conversation)
+    conversation_id=$(_aimee_select conversation)
 
     if [[ -n "$conversation_id" ]]; then
         # Prompt for new name
@@ -235,24 +235,24 @@ function _omega_action_conversation_rename() {
         read -r new_name </dev/tty
 
         if [[ -n "$new_name" ]]; then
-            _omega_exec conversation rename "$conversation_id" $new_name
+            _aimee_exec conversation rename "$conversation_id" $new_name
         else
-            _omega_log error "No name provided, rename cancelled"
+            _aimee_log error "No name provided, rename cancelled"
         fi
     fi
 }
 
 # Helper function to clone and switch to conversation
-function _omega_clone_and_switch() {
+function _aimee_clone_and_switch() {
     local clone_target="$1"
     
     # Store original conversation ID to check if we're cloning current conversation
-    local original_conversation_id="$_OMEGA_CONVERSATION_ID"
+    local original_conversation_id="$_AIMEE_CONVERSATION_ID"
     
     # Execute clone command
-    _omega_log info "Cloning conversation \033[1m${clone_target}\033[0m"
+    _aimee_log info "Cloning conversation \033[1m${clone_target}\033[0m"
     local clone_output
-    clone_output=$($_OMEGA_BIN conversation clone "$clone_target" 2>&1)
+    clone_output=$($_AIMEE_BIN conversation clone "$clone_target" 2>&1)
     local clone_exit_code=$?
     
     if [[ $clone_exit_code -eq 0 ]]; then
@@ -261,23 +261,23 @@ function _omega_clone_and_switch() {
         
         if [[ -n "$new_id" ]]; then
             # Switch to cloned conversation and track previous
-            _omega_switch_conversation "$new_id"
+            _aimee_switch_conversation "$new_id"
             
-            _omega_log success "└─ Switched to conversation \033[1m${new_id}\033[0m"
+            _aimee_log success "└─ Switched to conversation \033[1m${new_id}\033[0m"
             
             # Show content and info only if cloning a different conversation (not current one)
             if [[ "$clone_target" != "$original_conversation_id" ]]; then
                 echo
-                _omega_exec conversation show "$new_id"
+                _aimee_exec conversation show "$new_id"
                 
                 # Show new conversation info
                 echo
-                _omega_exec conversation info "$new_id"
+                _aimee_exec conversation info "$new_id"
             fi
         else
-            _omega_log error "Failed to extract new conversation ID from clone output"
+            _aimee_log error "Failed to extract new conversation ID from clone output"
         fi
     else
-        _omega_log error "Failed to clone conversation: $clone_output"
+        _aimee_log error "Failed to clone conversation: $clone_output"
     fi
 }

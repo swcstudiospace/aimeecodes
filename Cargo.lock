@@ -27,10 +27,695 @@ dependencies = [
 ]
 
 [[package]]
+name = "aimee_anda"
+version = "0.1.0"
+dependencies = [
+ "aimee_domain",
+ "anda_kip",
+ "anyhow",
+ "async-trait",
+ "chrono",
+ "derive_more",
+ "derive_setters",
+ "hex",
+ "pretty_assertions",
+ "reqwest 0.12.28",
+ "serde",
+ "serde_json",
+ "sha2 0.11.0",
+ "tempfile",
+ "thiserror 2.0.19",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "aimee_anda_icp"
+version = "0.1.0"
+dependencies = [
+ "aimee_anda",
+ "aimee_domain",
+ "anyhow",
+ "async-trait",
+ "chrono",
+ "derive_setters",
+ "hex",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "sha2 0.11.0",
+ "tempfile",
+ "thiserror 2.0.19",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "aimee_api"
+version = "0.1.0"
+dependencies = [
+ "aimee_app",
+ "aimee_config",
+ "aimee_domain",
+ "aimee_infra",
+ "aimee_repo",
+ "aimee_services",
+ "aimee_stream",
+ "anyhow",
+ "async-trait",
+ "futures",
+ "serde_json",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "aimee_app"
+version = "0.1.0"
+dependencies = [
+ "aimee_anda",
+ "aimee_anda_icp",
+ "aimee_config",
+ "aimee_display",
+ "aimee_domain",
+ "aimee_embed",
+ "aimee_eventsource",
+ "aimee_json_repair",
+ "aimee_stream",
+ "aimee_template",
+ "aimee_test_kit",
+ "anyhow",
+ "async-recursion",
+ "async-trait",
+ "backon",
+ "bytes",
+ "chrono",
+ "console",
+ "convert_case 0.11.0",
+ "dashmap 7.0.0-rc2",
+ "derive_more",
+ "derive_setters",
+ "fake",
+ "futures",
+ "glob",
+ "handlebars",
+ "hex",
+ "include_dir",
+ "insta",
+ "lazy_static",
+ "merge",
+ "pretty_assertions",
+ "regex",
+ "reqwest 0.12.28",
+ "schemars 1.2.2",
+ "serde",
+ "serde_json",
+ "serde_yml 0.0.13",
+ "sha2 0.11.0",
+ "strum",
+ "strum_macros 0.28.0",
+ "tempfile",
+ "thiserror 2.0.19",
+ "tokio",
+ "tokio-stream",
+ "tonic",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "aimee_ci"
+version = "0.1.0"
+dependencies = [
+ "derive_setters",
+ "gh-workflow",
+ "indexmap 2.14.0",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "aimee_config"
+version = "0.1.0"
+dependencies = [
+ "aimee_domain",
+ "anyhow",
+ "config",
+ "derive_setters",
+ "dirs",
+ "dotenvy",
+ "fake",
+ "is_ci",
+ "pretty_assertions",
+ "schemars 1.2.2",
+ "serde",
+ "serde_json",
+ "strum_macros 0.28.0",
+ "thiserror 2.0.19",
+ "tokio",
+ "toml_edit 0.25.13+spec-1.1.0",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "aimee_display"
+version = "0.1.0"
+dependencies = [
+ "console",
+ "derive_setters",
+ "insta",
+ "pretty_assertions",
+ "regex",
+ "similar 3.1.2",
+ "strip-ansi-escapes",
+ "syntect",
+ "termimad",
+ "terminal-colorsaurus",
+ "two-face",
+]
+
+[[package]]
+name = "aimee_domain"
+version = "0.1.0"
+dependencies = [
+ "aimee_json_repair",
+ "aimee_template",
+ "aimee_test_kit",
+ "aimee_tool_macros",
+ "anyhow",
+ "async-trait",
+ "base64 0.23.1",
+ "chrono",
+ "convert_case 0.11.0",
+ "derive-getters",
+ "derive_more",
+ "derive_setters",
+ "eserde",
+ "fake",
+ "fnv_rs",
+ "glob",
+ "indexmap 2.14.0",
+ "insta",
+ "is_ci",
+ "lazy_static",
+ "merge",
+ "nom",
+ "pretty_assertions",
+ "regex",
+ "schemars 1.2.2",
+ "serde",
+ "serde_json",
+ "serde_yml 0.0.13",
+ "strum",
+ "strum_macros 0.28.0",
+ "thiserror 2.0.19",
+ "tokio",
+ "tokio-stream",
+ "tracing",
+ "url",
+ "uuid",
+]
+
+[[package]]
+name = "aimee_embed"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "handlebars",
+ "include_dir",
+]
+
+[[package]]
+name = "aimee_eventsource"
+version = "0.1.0"
+dependencies = [
+ "aimee_eventsource_stream",
+ "futures",
+ "futures-core",
+ "futures-retry",
+ "futures-timer",
+ "mime",
+ "nom",
+ "pin-project-lite",
+ "pin-utils",
+ "reqwest 0.12.28",
+ "rocket",
+ "thiserror 2.0.19",
+ "tokio",
+]
+
+[[package]]
+name = "aimee_eventsource_stream"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "futures-core",
+ "http 1.5.0",
+ "nom",
+ "pin-project-lite",
+ "reqwest 0.11.27",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "aimee_fs"
+version = "0.1.0"
+dependencies = [
+ "aimee_domain",
+ "anyhow",
+ "bstr",
+ "hex",
+ "infer",
+ "pretty_assertions",
+ "sha2 0.11.0",
+ "tempfile",
+ "thiserror 2.0.19",
+ "tokio",
+]
+
+[[package]]
+name = "aimee_infra"
+version = "0.1.0"
+dependencies = [
+ "aimee_app",
+ "aimee_config",
+ "aimee_domain",
+ "aimee_eventsource",
+ "aimee_fs",
+ "aimee_select",
+ "aimee_services",
+ "aimee_snaps",
+ "aimee_walker",
+ "anyhow",
+ "async-trait",
+ "aws-config",
+ "aws-credential-types",
+ "backon",
+ "base64 0.23.1",
+ "bstr",
+ "bytes",
+ "cacache",
+ "chrono",
+ "diesel",
+ "diesel_migrations",
+ "dirs",
+ "dotenvy",
+ "fake",
+ "futures",
+ "glob",
+ "google-cloud-auth",
+ "http 1.5.0",
+ "libsqlite3-sys",
+ "oauth2",
+ "open",
+ "pretty_assertions",
+ "reqwest 0.12.28",
+ "rmcp",
+ "schemars 1.2.2",
+ "serde",
+ "serde_json",
+ "serde_urlencoded",
+ "serial_test",
+ "tempfile",
+ "thiserror 2.0.19",
+ "tokio",
+ "tonic",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "aimee_json_repair"
+version = "0.1.0"
+dependencies = [
+ "pretty_assertions",
+ "regex",
+ "schemars 1.2.2",
+ "serde",
+ "serde_json",
+ "serde_json5",
+ "thiserror 2.0.19",
+]
+
+[[package]]
+name = "aimee_main"
+version = "0.1.0"
+dependencies = [
+ "aimee_api",
+ "aimee_app",
+ "aimee_config",
+ "aimee_display",
+ "aimee_domain",
+ "aimee_embed",
+ "aimee_fs",
+ "aimee_markdown_stream",
+ "aimee_select",
+ "aimee_spinner",
+ "aimee_tracker",
+ "aimee_walker",
+ "anyhow",
+ "arboard",
+ "async-recursion",
+ "bstr",
+ "chrono",
+ "clap",
+ "clap_complete",
+ "colored",
+ "console",
+ "convert_case 0.11.0",
+ "derive_setters",
+ "dirs",
+ "enable-ansi-support",
+ "fake",
+ "futures",
+ "gix",
+ "humantime",
+ "include_dir",
+ "indexmap 2.14.0",
+ "insta",
+ "lazy_static",
+ "libc",
+ "merge",
+ "nu-ansi-term",
+ "nucleo",
+ "nucleo-picker",
+ "num-format",
+ "open",
+ "pretty_assertions",
+ "ratatui",
+ "regex",
+ "reqwest 0.12.28",
+ "rustls 0.23.43",
+ "rustyline",
+ "serde",
+ "serde_json",
+ "serial_test",
+ "strip-ansi-escapes",
+ "strum",
+ "strum_macros 0.28.0",
+ "tempfile",
+ "terminal_size",
+ "thiserror 2.0.19",
+ "tiny_http",
+ "tokio",
+ "tokio-stream",
+ "toml_edit 0.25.13+spec-1.1.0",
+ "tracing",
+ "update-informer",
+ "url",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "aimee_markdown_stream"
+version = "0.1.0"
+dependencies = [
+ "colored",
+ "insta",
+ "pretty_assertions",
+ "streamdown-ansi",
+ "streamdown-core",
+ "streamdown-parser",
+ "streamdown-render",
+ "strip-ansi-escapes",
+ "syntect",
+ "terminal-colorsaurus",
+ "unicode-segmentation",
+ "unicode-width 0.2.2",
+]
+
+[[package]]
+name = "aimee_repo"
+version = "0.1.0"
+dependencies = [
+ "aimee_app",
+ "aimee_config",
+ "aimee_domain",
+ "aimee_eventsource",
+ "aimee_eventsource_stream",
+ "aimee_fs",
+ "aimee_infra",
+ "aimee_json_repair",
+ "aimee_snaps",
+ "aimee_template",
+ "aimee_test_kit",
+ "anyhow",
+ "async-openai",
+ "async-trait",
+ "aws-config",
+ "aws-credential-types",
+ "aws-sdk-bedrockruntime",
+ "aws-smithy-async",
+ "aws-smithy-runtime",
+ "aws-smithy-runtime-api",
+ "aws-smithy-types",
+ "backon",
+ "base64 0.23.1",
+ "bytes",
+ "chrono",
+ "derive_more",
+ "derive_setters",
+ "diesel",
+ "diesel_migrations",
+ "dirs",
+ "fake",
+ "futures",
+ "google-cloud-auth",
+ "gray_matter",
+ "handlebars",
+ "insta",
+ "lazy_static",
+ "merge",
+ "mockito",
+ "pretty_assertions",
+ "prost",
+ "prost-types",
+ "regex",
+ "reqwest 0.12.28",
+ "schemars 1.2.2",
+ "serde",
+ "serde_json",
+ "serial_test",
+ "strum",
+ "tempfile",
+ "thiserror 2.0.19",
+ "tokio",
+ "tokio-stream",
+ "tonic",
+ "tonic-prost",
+ "tonic-prost-build",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "aimee_select"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bstr",
+ "colored",
+ "console",
+ "crossterm 0.29.0",
+ "derive_setters",
+ "nucleo",
+ "nucleo-picker",
+ "pretty_assertions",
+ "rustyline",
+ "tracing",
+]
+
+[[package]]
+name = "aimee_services"
+version = "0.1.0"
+dependencies = [
+ "aimee_app",
+ "aimee_config",
+ "aimee_domain",
+ "aimee_eventsource",
+ "aimee_fs",
+ "aimee_snaps",
+ "aimee_stream",
+ "aimee_test_kit",
+ "anyhow",
+ "async-recursion",
+ "async-stream",
+ "async-trait",
+ "backon",
+ "base64 0.23.1",
+ "bstr",
+ "bytes",
+ "chrono",
+ "dashmap 7.0.0-rc2",
+ "derive_more",
+ "derive_setters",
+ "fake",
+ "futures",
+ "glob",
+ "gray_matter",
+ "grep-regex",
+ "grep-searcher",
+ "handlebars",
+ "html2md",
+ "http 1.5.0",
+ "humantime",
+ "ignore",
+ "infer",
+ "lazy_static",
+ "merge",
+ "oauth2",
+ "pretty_assertions",
+ "regex",
+ "reqwest 0.12.28",
+ "serde",
+ "serde_json",
+ "serde_urlencoded",
+ "serde_yml 0.0.13",
+ "strip-ansi-escapes",
+ "strum",
+ "strum_macros 0.28.0",
+ "tempfile",
+ "thiserror 2.0.19",
+ "tokio",
+ "tokio-stream",
+ "tonic",
+ "tracing",
+ "url",
+ "uuid",
+]
+
+[[package]]
+name = "aimee_snaps"
+version = "0.1.0"
+dependencies = [
+ "aimee_domain",
+ "aimee_fs",
+ "anyhow",
+ "chrono",
+ "fnv_rs",
+ "serde",
+ "tempfile",
+ "tokio",
+ "uuid",
+]
+
+[[package]]
+name = "aimee_spinner"
+version = "0.1.0"
+dependencies = [
+ "aimee_domain",
+ "anyhow",
+ "colored",
+ "console",
+ "indicatif",
+ "pretty_assertions",
+ "rand 0.10.2",
+ "terminal_size",
+ "tokio",
+ "unicode-width 0.2.2",
+]
+
+[[package]]
+name = "aimee_stream"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "tokio",
+]
+
+[[package]]
+name = "aimee_template"
+version = "0.1.0"
+dependencies = [
+ "html-escape",
+ "pretty_assertions",
+]
+
+[[package]]
+name = "aimee_test_kit"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
+name = "aimee_tool_macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 3.0.3",
+]
+
+[[package]]
+name = "aimee_tracker"
+version = "0.1.0"
+dependencies = [
+ "aimee_domain",
+ "anyhow",
+ "async-trait",
+ "bstr",
+ "chrono",
+ "convert_case 0.11.0",
+ "derive_more",
+ "dirs",
+ "http 1.5.0",
+ "lazy_static",
+ "machineid-rs",
+ "posthog-rs",
+ "pretty_assertions",
+ "regex",
+ "reqwest 0.12.28",
+ "serde",
+ "serde_json",
+ "sysinfo 0.38.4",
+ "tokio",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "url",
+ "uuid",
+ "whoami 2.1.2",
+]
+
+[[package]]
+name = "aimee_walker"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "derive_setters",
+ "ignore",
+ "pretty_assertions",
+ "tempfile",
+ "tokio",
+]
+
+[[package]]
 name = "allocator-api2"
 version = "0.2.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "683d7910e743518b0e34f1186f92494becacb047c7b6bf616c96772180fef923"
+
+[[package]]
+name = "anda_kip"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0cb63d4c55b6f61a3cd89e0453a8bc2e628bfa134b86deeafcf7ff66bd5ddce6"
+dependencies = [
+ "async-trait",
+ "chrono",
+ "nom",
+ "nom-language",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.19",
+]
 
 [[package]]
 name = "android_system_properties"
@@ -878,9 +1563,9 @@ dependencies = [
 
 [[package]]
 name = "bumpalo"
-version = "3.20.2"
+version = "3.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d20789868f4b01b2f2caec9f5c4e0213b41e3e5702a50157d699ae31ced2fcb"
+checksum = "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649"
 
 [[package]]
 name = "by_address"
@@ -4464,15 +5149,6 @@ checksum = "a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695"
 
 [[package]]
 name = "itertools"
-version = "0.13.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
-dependencies = [
- "either",
-]
-
-[[package]]
-name = "itertools"
 version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
@@ -4597,13 +5273,12 @@ dependencies = [
 
 [[package]]
 name = "js-sys"
-version = "0.3.95"
+version = "0.3.103"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2964e92d1d9dc3364cae4d718d93f227e3abb088e747d92e0395bfdedf1c12ca"
+checksum = "53b44bfcdb3f8d5837a46dae1ca9660a837176eee74a28b229bc626816589102"
 dependencies = [
  "cfg-if",
  "futures-util",
- "once_cell",
  "wasm-bindgen",
 ]
 
@@ -5155,6 +5830,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "nom-language"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2de2bc5b451bfedaef92c90b8939a8fff5770bdcc1fafd6239d086aab8fa6b29"
+dependencies = [
+ "nom",
+]
+
+[[package]]
 name = "nonempty"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5511,627 +6195,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ff76201f031d8863c38aa7f905eca4f53abbfa15f609db4277d44cd8938f33fe"
 dependencies = [
  "memchr",
-]
-
-[[package]]
-name = "omega_api"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "futures",
- "omega_app",
- "omega_config",
- "omega_domain",
- "omega_infra",
- "omega_repo",
- "omega_services",
- "omega_stream",
- "serde_json",
- "tokio",
- "url",
-]
-
-[[package]]
-name = "omega_app"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-recursion",
- "async-trait",
- "backon",
- "bytes",
- "chrono",
- "console",
- "convert_case 0.11.0",
- "dashmap 7.0.0-rc2",
- "derive_more",
- "derive_setters",
- "fake",
- "futures",
- "glob",
- "handlebars",
- "hex",
- "include_dir",
- "insta",
- "lazy_static",
- "merge",
- "omega_config",
- "omega_display",
- "omega_domain",
- "omega_embed",
- "omega_eventsource",
- "omega_json_repair",
- "omega_stream",
- "omega_template",
- "omega_test_kit",
- "pretty_assertions",
- "regex",
- "reqwest 0.12.28",
- "schemars 1.2.2",
- "serde",
- "serde_json",
- "serde_yml 0.0.13",
- "sha2 0.11.0",
- "strum",
- "strum_macros 0.28.0",
- "tempfile",
- "thiserror 2.0.19",
- "tokio",
- "tokio-stream",
- "tonic",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "omega_ci"
-version = "0.1.0"
-dependencies = [
- "derive_setters",
- "gh-workflow",
- "indexmap 2.14.0",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "omega_config"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "config",
- "derive_setters",
- "dirs",
- "dotenvy",
- "fake",
- "is_ci",
- "omega_domain",
- "pretty_assertions",
- "schemars 1.2.2",
- "serde",
- "serde_json",
- "strum_macros 0.28.0",
- "thiserror 2.0.19",
- "tokio",
- "toml_edit 0.25.13+spec-1.1.0",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "omega_display"
-version = "0.1.0"
-dependencies = [
- "console",
- "derive_setters",
- "insta",
- "pretty_assertions",
- "regex",
- "similar 3.1.2",
- "strip-ansi-escapes",
- "syntect",
- "termimad",
- "terminal-colorsaurus",
- "two-face",
-]
-
-[[package]]
-name = "omega_domain"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "base64 0.23.1",
- "chrono",
- "convert_case 0.11.0",
- "derive-getters",
- "derive_more",
- "derive_setters",
- "eserde",
- "fake",
- "fnv_rs",
- "glob",
- "indexmap 2.14.0",
- "insta",
- "is_ci",
- "lazy_static",
- "merge",
- "nom",
- "omega_json_repair",
- "omega_template",
- "omega_test_kit",
- "omega_tool_macros",
- "pretty_assertions",
- "regex",
- "schemars 1.2.2",
- "serde",
- "serde_json",
- "serde_yml 0.0.13",
- "strum",
- "strum_macros 0.28.0",
- "thiserror 2.0.19",
- "tokio",
- "tokio-stream",
- "tracing",
- "url",
- "uuid",
-]
-
-[[package]]
-name = "omega_embed"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "handlebars",
- "include_dir",
-]
-
-[[package]]
-name = "omega_eventsource"
-version = "0.1.0"
-dependencies = [
- "futures",
- "futures-core",
- "futures-retry",
- "futures-timer",
- "mime",
- "nom",
- "omega_eventsource_stream",
- "pin-project-lite",
- "pin-utils",
- "reqwest 0.12.28",
- "rocket",
- "thiserror 2.0.19",
- "tokio",
-]
-
-[[package]]
-name = "omega_eventsource_stream"
-version = "0.1.0"
-dependencies = [
- "futures",
- "futures-core",
- "http 1.5.0",
- "nom",
- "pin-project-lite",
- "reqwest 0.11.27",
- "tokio",
- "url",
-]
-
-[[package]]
-name = "omega_fs"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bstr",
- "hex",
- "infer",
- "omega_domain",
- "pretty_assertions",
- "sha2 0.11.0",
- "tempfile",
- "thiserror 2.0.19",
- "tokio",
-]
-
-[[package]]
-name = "omega_infra"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "aws-config",
- "aws-credential-types",
- "backon",
- "base64 0.23.1",
- "bstr",
- "bytes",
- "cacache",
- "chrono",
- "diesel",
- "diesel_migrations",
- "dirs",
- "dotenvy",
- "fake",
- "futures",
- "glob",
- "google-cloud-auth",
- "http 1.5.0",
- "libsqlite3-sys",
- "oauth2",
- "omega_app",
- "omega_config",
- "omega_domain",
- "omega_eventsource",
- "omega_fs",
- "omega_select",
- "omega_services",
- "omega_snaps",
- "omega_walker",
- "open",
- "pretty_assertions",
- "reqwest 0.12.28",
- "rmcp",
- "schemars 1.2.2",
- "serde",
- "serde_json",
- "serde_urlencoded",
- "serial_test",
- "tempfile",
- "thiserror 2.0.19",
- "tokio",
- "tonic",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "omega_json_repair"
-version = "0.1.0"
-dependencies = [
- "pretty_assertions",
- "regex",
- "schemars 1.2.2",
- "serde",
- "serde_json",
- "serde_json5",
- "thiserror 2.0.19",
-]
-
-[[package]]
-name = "omega_main"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "arboard",
- "async-recursion",
- "bstr",
- "chrono",
- "clap",
- "clap_complete",
- "colored",
- "console",
- "convert_case 0.11.0",
- "derive_setters",
- "dirs",
- "enable-ansi-support",
- "fake",
- "futures",
- "gix",
- "humantime",
- "include_dir",
- "indexmap 2.14.0",
- "insta",
- "lazy_static",
- "libc",
- "merge",
- "nu-ansi-term",
- "nucleo",
- "nucleo-picker",
- "num-format",
- "omega_api",
- "omega_app",
- "omega_config",
- "omega_display",
- "omega_domain",
- "omega_embed",
- "omega_fs",
- "omega_markdown_stream",
- "omega_select",
- "omega_spinner",
- "omega_tracker",
- "omega_walker",
- "open",
- "pretty_assertions",
- "ratatui",
- "regex",
- "rustls 0.23.43",
- "rustyline",
- "serde",
- "serde_json",
- "serial_test",
- "strip-ansi-escapes",
- "strum",
- "strum_macros 0.28.0",
- "tempfile",
- "terminal_size",
- "thiserror 2.0.19",
- "tiny_http",
- "tokio",
- "tokio-stream",
- "toml_edit 0.25.13+spec-1.1.0",
- "tracing",
- "update-informer",
- "url",
- "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "omega_markdown_stream"
-version = "0.1.0"
-dependencies = [
- "colored",
- "insta",
- "pretty_assertions",
- "streamdown-ansi",
- "streamdown-core",
- "streamdown-parser",
- "streamdown-render",
- "strip-ansi-escapes",
- "syntect",
- "terminal-colorsaurus",
- "unicode-segmentation",
- "unicode-width 0.2.2",
-]
-
-[[package]]
-name = "omega_repo"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-openai",
- "async-trait",
- "aws-config",
- "aws-credential-types",
- "aws-sdk-bedrockruntime",
- "aws-smithy-async",
- "aws-smithy-runtime",
- "aws-smithy-runtime-api",
- "aws-smithy-types",
- "backon",
- "base64 0.23.1",
- "bytes",
- "chrono",
- "derive_more",
- "derive_setters",
- "diesel",
- "diesel_migrations",
- "dirs",
- "fake",
- "futures",
- "google-cloud-auth",
- "gray_matter",
- "handlebars",
- "insta",
- "lazy_static",
- "merge",
- "mockito",
- "omega_app",
- "omega_config",
- "omega_domain",
- "omega_eventsource",
- "omega_eventsource_stream",
- "omega_fs",
- "omega_infra",
- "omega_json_repair",
- "omega_snaps",
- "omega_template",
- "omega_test_kit",
- "pretty_assertions",
- "prost",
- "prost-types",
- "regex",
- "reqwest 0.12.28",
- "schemars 1.2.2",
- "serde",
- "serde_json",
- "serial_test",
- "strum",
- "tempfile",
- "thiserror 2.0.19",
- "tokio",
- "tokio-stream",
- "tonic",
- "tonic-prost",
- "tonic-prost-build",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "omega_select"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bstr",
- "colored",
- "console",
- "crossterm 0.29.0",
- "derive_setters",
- "nucleo",
- "nucleo-picker",
- "pretty_assertions",
- "rustyline",
- "tracing",
-]
-
-[[package]]
-name = "omega_services"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-recursion",
- "async-stream",
- "async-trait",
- "backon",
- "base64 0.23.1",
- "bstr",
- "bytes",
- "chrono",
- "dashmap 7.0.0-rc2",
- "derive_more",
- "derive_setters",
- "fake",
- "futures",
- "glob",
- "gray_matter",
- "grep-regex",
- "grep-searcher",
- "handlebars",
- "html2md",
- "http 1.5.0",
- "humantime",
- "ignore",
- "infer",
- "lazy_static",
- "merge",
- "oauth2",
- "omega_app",
- "omega_config",
- "omega_domain",
- "omega_eventsource",
- "omega_fs",
- "omega_snaps",
- "omega_stream",
- "omega_test_kit",
- "pretty_assertions",
- "regex",
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "serde_urlencoded",
- "serde_yml 0.0.13",
- "strip-ansi-escapes",
- "strum",
- "strum_macros 0.28.0",
- "tempfile",
- "thiserror 2.0.19",
- "tokio",
- "tokio-stream",
- "tonic",
- "tracing",
- "url",
- "uuid",
-]
-
-[[package]]
-name = "omega_snaps"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "chrono",
- "fnv_rs",
- "omega_domain",
- "omega_fs",
- "serde",
- "tempfile",
- "tokio",
- "uuid",
-]
-
-[[package]]
-name = "omega_spinner"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "colored",
- "console",
- "indicatif",
- "omega_domain",
- "pretty_assertions",
- "rand 0.10.2",
- "terminal_size",
- "tokio",
- "unicode-width 0.2.2",
-]
-
-[[package]]
-name = "omega_stream"
-version = "0.1.0"
-dependencies = [
- "futures",
- "tokio",
-]
-
-[[package]]
-name = "omega_template"
-version = "0.1.0"
-dependencies = [
- "html-escape",
- "pretty_assertions",
-]
-
-[[package]]
-name = "omega_test_kit"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
- "tokio",
-]
-
-[[package]]
-name = "omega_tool_macros"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 3.0.3",
-]
-
-[[package]]
-name = "omega_tracker"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "bstr",
- "chrono",
- "convert_case 0.11.0",
- "derive_more",
- "dirs",
- "http 1.5.0",
- "lazy_static",
- "machineid-rs",
- "omega_domain",
- "posthog-rs",
- "pretty_assertions",
- "regex",
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "sysinfo 0.38.4",
- "tokio",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
- "url",
- "uuid",
- "whoami 2.1.2",
-]
-
-[[package]]
-name = "omega_walker"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "derive_setters",
- "ignore",
- "pretty_assertions",
- "tempfile",
- "tokio",
 ]
 
 [[package]]
@@ -6702,7 +6765,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "343d3bd7056eda839b03204e68deff7d1b13aba7af2b2fd16890697274262ee7"
 dependencies = [
  "heck",
- "itertools 0.13.0",
+ "itertools",
  "log",
  "multimap",
  "petgraph",
@@ -6723,7 +6786,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b570b25f7617e43d59005d0990ccb79e950a423952cea19671b7a876da390adf"
 dependencies = [
  "anyhow",
- "itertools 0.13.0",
+ "itertools",
  "proc-macro2",
  "quote",
  "syn 2.0.119",
@@ -6975,7 +7038,7 @@ dependencies = [
  "bitflags 2.13.1",
  "compact_str",
  "hashbrown 0.17.1",
- "itertools 0.14.0",
+ "itertools",
  "kasuari",
  "lru",
  "palette",
@@ -7009,7 +7072,7 @@ dependencies = [
  "hashbrown 0.17.1",
  "indoc",
  "instability",
- "itertools 0.14.0",
+ "itertools",
  "line-clipping",
  "ratatui-core",
  "serde",
@@ -9247,7 +9310,7 @@ version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "16b380a1238663e5f8a691f9039c73e1cdae598a30e9855f541d29b08b53e9a5"
 dependencies = [
- "itertools 0.14.0",
+ "itertools",
  "unicode-segmentation",
  "unicode-width 0.2.2",
 ]
@@ -9492,9 +9555,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen"
-version = "0.2.118"
+version = "0.2.126"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0bf938a0bacb0469e83c1e148908bd7d5a6010354cf4fb73279b7447422e3a89"
+checksum = "4b067c0c11094aef6b7a801c1e34a26affafdf3d051dba08456b868789aaf9a4"
 dependencies = [
  "cfg-if",
  "once_cell",
@@ -9505,9 +9568,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-futures"
-version = "0.4.68"
+version = "0.4.76"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f371d383f2fb139252e0bfac3b81b265689bf45b6874af544ffa4c975ac1ebf8"
+checksum = "c62df1340f32221cb9c54d6a27b030e3dba64361d4a95bed55f9aacb44da291d"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
@@ -9515,9 +9578,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-macro"
-version = "0.2.118"
+version = "0.2.126"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eeff24f84126c0ec2db7a449f0c2ec963c6a49efe0698c4242929da037ca28ed"
+checksum = "167ce5e579f6bcf889c4f7175a8a5a585de84e8ff93976ce393efa5f2837aab1"
 dependencies = [
  "quote",
  "wasm-bindgen-macro-support",
@@ -9525,9 +9588,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-macro-support"
-version = "0.2.118"
+version = "0.2.126"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d08065faf983b2b80a79fd87d8254c409281cf7de75fc4b773019824196c904"
+checksum = "f3997c7839262f4ef12cf90b818d6340c18e80f263f1a94bf157d0ec4420380e"
 dependencies = [
  "bumpalo",
  "proc-macro2",
@@ -9538,9 +9601,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-shared"
-version = "0.2.118"
+version = "0.2.126"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fd04d9e306f1907bd13c6361b5c6bfc7b3b3c095ed3f8a9246390f8dbdee129"
+checksum = "dc1b4cb0cc549fcf58d7dfc081778139b3d283a081644e833e84682ad71cea24"
 dependencies = [
  "unicode-ident",
 ]
@@ -9607,9 +9670,9 @@ dependencies = [
 
 [[package]]
 name = "web-sys"
-version = "0.3.95"
+version = "0.3.103"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f2dfbb17949fa2088e5d39408c48368947b86f7834484e87b73de55bc14d97d"
+checksum = "8622dcb61c0bcc9fffa6938bed81210af2da9a7e4a1a834b2e37a59b6dfb6141"
 dependencies = [
  "js-sys",
  "wasm-bindgen",

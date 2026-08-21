@@ -1,6 +1,6 @@
 # Semantic Search Tool Selection Evaluation
 
-This evaluation validates that the Omega agent correctly identifies and uses the `sem_search` (Codebase Search) tool when presented with conceptual, functionality-based code location queries.
+This evaluation validates that the Aimee agent correctly identifies and uses the `sem_search` (Codebase Search) tool when presented with conceptual, functionality-based code location queries.
 
 ## What We're Testing
 

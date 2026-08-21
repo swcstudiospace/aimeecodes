@@ -5,7 +5,7 @@
 # Action handler: Directly commit changes with AI-generated message
 # Usage: :commit [additional context]
 # Note: This action clears the buffer after execution
-function _omega_action_commit() {
+function _aimee_action_commit() {
     local additional_context="$1"
     local commit_message
     # Generate AI commit message
@@ -16,17 +16,17 @@ function _omega_action_commit() {
     
     # Build commit command with optional additional context
     if [[ -n "$additional_context" ]]; then
-        commit_message=$(FORCE_COLOR=true CLICOLOR_FORCE=1 $_OMEGA_BIN commit --max-diff "$_OMEGA_MAX_COMMIT_DIFF" $additional_context)
+        commit_message=$(FORCE_COLOR=true CLICOLOR_FORCE=1 $_AIMEE_BIN commit --max-diff "$_AIMEE_MAX_COMMIT_DIFF" $additional_context)
     else
-        commit_message=$(FORCE_COLOR=true CLICOLOR_FORCE=1 $_OMEGA_BIN commit --max-diff "$_OMEGA_MAX_COMMIT_DIFF")
+        commit_message=$(FORCE_COLOR=true CLICOLOR_FORCE=1 $_AIMEE_BIN commit --max-diff "$_AIMEE_MAX_COMMIT_DIFF")
     fi
-    _omega_reset
+    _aimee_reset
 }
 
 
 # Action handler: Previews AI-generated commit message 
 # Usage: :commit-preview [additional context]
-function _omega_action_commit_preview() {
+function _aimee_action_commit_preview() {
     local additional_context="$1"
     local commit_message
     # Generate AI commit message
@@ -37,9 +37,9 @@ function _omega_action_commit_preview() {
     
     # Build commit command with optional additional context
     if [[ -n "$additional_context" ]]; then
-        commit_message=$(FORCE_COLOR=true CLICOLOR_FORCE=1 $_OMEGA_BIN commit --preview --max-diff "$_OMEGA_MAX_COMMIT_DIFF" $additional_context)
+        commit_message=$(FORCE_COLOR=true CLICOLOR_FORCE=1 $_AIMEE_BIN commit --preview --max-diff "$_AIMEE_MAX_COMMIT_DIFF" $additional_context)
     else
-        commit_message=$(FORCE_COLOR=true CLICOLOR_FORCE=1 $_OMEGA_BIN commit --preview --max-diff "$_OMEGA_MAX_COMMIT_DIFF")
+        commit_message=$(FORCE_COLOR=true CLICOLOR_FORCE=1 $_AIMEE_BIN commit --preview --max-diff "$_AIMEE_MAX_COMMIT_DIFF")
     fi
     
     # Proceed only if command succeeded
@@ -57,6 +57,6 @@ function _omega_action_commit_preview() {
         # Refresh display to show the new command
         zle reset-prompt
     else
-        _omega_reset
+        _aimee_reset
     fi
 }

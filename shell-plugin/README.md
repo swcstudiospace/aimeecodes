@@ -1,10 +1,10 @@
-# Omega ZSH Plugin
+# Aimee ZSH Plugin
 
-A powerful ZSH plugin that provides intelligent command transformation, file tagging, and conversation management for the Omega AI assistant.
+A powerful ZSH plugin that provides intelligent command transformation, file tagging, and conversation management for the Aimee AI assistant.
 
 ## Features
 
-- **Smart Command Transformation**: Convert `:command` syntax into omega executions
+- **Smart Command Transformation**: Convert `:command` syntax into aimee executions
 - **Agent Selection**: Tab completion for available agents using `:agent_name`
 - **File Tagging**: Interactive file selection with `@[filename]` syntax
 - **Syntax Highlighting**: Visual feedback for commands and tagged files
@@ -16,7 +16,7 @@ A powerful ZSH plugin that provides intelligent command transformation, file tag
 Before using this plugin, ensure you have the following tools installed:
 
 - **fd** - Fast file finder (alternative to find)
-- **omega** - The Omega CLI tool
+- **aimee** - The Aimee CLI tool
 
 ### Installation of Prerequisites
 
@@ -41,7 +41,7 @@ Begin any command with `:` followed by your prompt:
 : Get the current time
 ```
 
-This automatically starts a new conversation with the default Omega agent.
+This automatically starts a new conversation with the default Aimee agent.
 
 ### Using Specific Agents
 
@@ -210,19 +210,19 @@ The plugin provides visual feedback through syntax highlighting:
 Customize the plugin behavior by setting these variables before loading the plugin:
 
 ```bash
-# Custom omega binary location
-export OMEGA_BIN="/path/to/custom/omega"
+# Custom aimee binary location
+export AIMEE_BIN="/path/to/custom/aimee"
 ```
 
 ### Available Configuration Variables
 
-- `OMEGA_BIN`: Path to the omega executable (default: `omega`)
-- `OMEGA_EDITOR`: Editor command to use for `:edit` command (default: `$EDITOR` or `nano`)
-- `OMEGA_SYNC_ENABLED`: Enable/disable automatic workspace sync (default: `true`)
-- `OMEGA_MAX_COMMIT_DIFF`: Maximum diff size for commit message generation in bytes (default: `100000`)
-- `OMEGA_SKIP_INTERACTIVE`: Skip interactive prompts (internal use)
-- `OMEGA_CURRENCY_SYMBOL`: Currency symbol for cost display in ZSH theme (default: `"$"`)
-- `OMEGA_CURRENCY_CONVERSION_RATE`: Conversion rate for currency display (default: `1.0`)
+- `AIMEE_BIN`: Path to the aimee executable (default: `aimee`)
+- `AIMEE_EDITOR`: Editor command to use for `:edit` command (default: `$EDITOR` or `nano`)
+- `AIMEE_SYNC_ENABLED`: Enable/disable automatic workspace sync (default: `true`)
+- `AIMEE_MAX_COMMIT_DIFF`: Maximum diff size for commit message generation in bytes (default: `100000`)
+- `AIMEE_SKIP_INTERACTIVE`: Skip interactive prompts (internal use)
+- `AIMEE_CURRENCY_SYMBOL`: Currency symbol for cost display in ZSH theme (default: `"$"`)
+- `AIMEE_CURRENCY_CONVERSION_RATE`: Conversion rate for currency display (default: `1.0`)
 - `NERD_FONT`: Enable Nerd Font icons in ZSH theme (default: auto-detected, set to `"1"` or `"true"` to enable, `"0"` or `"false"` to disable)
 - `USE_NERD_FONT`: Alternative variable for enabling Nerd Font icons (same behavior as `NERD_FONT`)
 - Internal pattern matching for conversation syntax (`:`)
@@ -240,7 +240,7 @@ This will index the current directory for semantic code search.
 
 ### Environment Diagnostics
 
-Run comprehensive environment diagnostics to check your Omega setup:
+Run comprehensive environment diagnostics to check your Aimee setup:
 
 ```bash
 :doctor
@@ -248,7 +248,7 @@ Run comprehensive environment diagnostics to check your Omega setup:
 
 This will check:
 - ZSH version and terminal information
-- Omega installation and version
+- Aimee installation and version
 - Plugin and theme loading status
 - Completions availability
 - Dependencies (fd, bat)
@@ -256,11 +256,11 @@ This will check:
 - Editor configuration and PATH setup
 - Nerd Font support for icons
 
-### .omega Directory
+### .aimee Directory
 
-The plugin creates a `.omega` directory in your current working directory (similar to `.git`) for temporary files:
+The plugin creates a `.aimee` directory in your current working directory (similar to `.git`) for temporary files:
 
-- `OMEGA_EDITMSG.md`: Temporary file used when opening an external editor with `:edit`
+- `AIMEE_EDITMSG.md`: Temporary file used when opening an external editor with `:edit`
 
 ## Advanced Features
 
@@ -268,14 +268,14 @@ The plugin creates a `.omega` directory in your current working directory (simil
 
 All transformed commands are properly saved to ZSH history, allowing you to:
 - Navigate command history with arrow keys
-- Search previous omega commands with `Ctrl+R`
+- Search previous aimee commands with `Ctrl+R`
 - Reuse complex commands with file tags
 
 ### Keyboard Shortcuts
 
 - **Tab**: Interactive completion for files (`@`) and agents (`:`)
 - **Enter**: Transform and execute `:commands`
-- **Ctrl+C**: Interrupt running omega commands
+- **Ctrl+C**: Interrupt running aimee commands
 
 ## Examples
 

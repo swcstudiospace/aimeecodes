@@ -1,1173 +1,400 @@
-<h1 align="center">Ω Omega Loops</h1>
-<p align="center">WEB3-native AI coding agent. Vibrant ratatui TUI in the terminal. PWA for browser and mobile next.</p>
+<p align="center">
+  <img src="assets/brand/banner.jpg" alt="Aimee Codes — three chevrons as a flock over a void grid" width="100%">
+</p>
 
-<p align="center"><code>curl -fsSL https://omegaloops.dev/cli | sh</code></p>
+<p align="center">
+  <img src="assets/brand/icon.jpg" alt="Aimee Codes mark" width="96" height="96">
+</p>
 
-[![CI Status](https://img.shields.io/github/actions/workflow/status/omegaloops/omegaloops/ci.yml?style=for-the-badge)](https://github.com/omegaloops/omegaloops/actions)
-[![GitHub Release](https://img.shields.io/github/v/release/omegaloops/omegaloops?style=for-the-badge)](https://github.com/omegaloops/omegaloops/releases)
-[![Discord](https://img.shields.io/discord/1044859667798568962?style=for-the-badge&cacheSeconds=120&logo=discord)](https://discord.gg/kRZBPpkgwq)
-[![CLA assistant](https://cla-assistant.io/readme/badge/omegaloops/omegaloops?style=for-the-badge)](https://cla-assistant.io/omegaloops/omegaloops)
+<h1 align="center"><code>aimee</code></h1>
 
-![Omega-Loops Demo](https://assets.antinomy.ai/images/omega_demo_2x.gif)
+<p align="center">
+  <strong>Aimee Codes</strong> — a CLI agent flock for design engineers and backend engineers.<br>
+  Sage researches. Muse plans. Aimee implements and verifies.<br>
+  Vibrant ratatui TUI in the terminal. Installable PWA for browser and mobile.
+</p>
+
+<p align="center">
+  <code>nix run github:swcstudiospace/omegaloops</code>
+  &nbsp;·&nbsp;
+  <code>aimee</code>
+</p>
+
+<p align="center">
+  A <a href="https://www.swcstudio.space/">Spectrum Web Co LLC</a> product
+  · brand <strong>@swcstudio</strong>
+  · GitHub <a href="https://github.com/swcstudiospace">swcstudiospace</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/swcstudiospace/omegaloops/actions"><img src="https://img.shields.io/github/actions/workflow/status/swcstudiospace/omegaloops/ci.yml?style=for-the-badge&label=CI" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-ff5a7a?style=for-the-badge" alt="Apache 2.0"></a>
+  <a href="https://github.com/swcstudiospace/omegaloops"><img src="https://img.shields.io/badge/github-swcstudiospace%2Fomegaloops-181717?style=for-the-badge&logo=github" alt="GitHub"></a>
+</p>
 
 ---
 
-<details>
-<summary><strong>Table&nbsp;of&nbsp;Contents</strong></summary>
-
-- [Quickstart](#quickstart)
-- [Usage Examples](#usage-examples)
-- [Why Omega Loops?](#why-omega-loops)
-- [How Omega Loops Works: Three Modes](#how-omega-loops-works-three-modes)
-  - [Interactive Mode (TUI)](#interactive-mode-tui)
-  - [One-Shot CLI Mode](#one-shot-cli-mode)
-  - [ZSH Plugin Mode (`:` prefix)](#zsh-plugin-mode--prefix)
-- [ZSH Plugin: The `:` Prefix System](#zsh-plugin-the--prefix-system)
-  - [Agents](#agents)
-  - [Sending Prompts](#sending-prompts)
-  - [Attaching Files](#attaching-files)
-  - [Conversation Management](#conversation-management)
-  - [Git Integration](#git-integration)
-  - [Shell Command Tools](#shell-command-tools)
-  - [Session & Configuration](#session--configuration)
-  - [Skills](#skills)
-  - [Customizing Agent Behavior](#customizing-agent-behavior)
-  - [Semantic Search (Workspace)](#semantic-search-workspace)
-  - [Quick Reference: All `:` Commands](#quick-reference-all--commands)
-- [Command-Line Options](#command-line-options)
-- [Advanced Configuration](#advanced-configuration)
-  - [Provider Configuration](#provider-configuration)
-    - [Managing Provider Credentials](#managing-provider-credentials)
-    - [Deprecated: Environment Variables](#deprecated-environment-variables)
-  - [omega.yaml Configuration Options](#omegayaml-configuration-options)
-  - [Environment Variables](#environment-variables)
-  - [MCP Configuration](#mcp-configuration)
-  - [Example Use Cases](#example-use-cases)
-  - [Usage in Multi-Agent Workflows](#usage-in-multi-agent-workflows)
-- [WEB3 + PWA](#web3--pwa)
-- [Documentation](#documentation)
-- [Community](#community)
-- [Support Us](#support-us)
-
-</details>
+<p align="center">
+  <a href="#quickstart">Quickstart</a> ·
+  <a href="#the-flock">The flock</a> ·
+  <a href="#three-modes">Three modes</a> ·
+  <a href="#command-line">CLI</a> ·
+  <a href="#configuration">Config</a> ·
+  <a href="#repository-map">Map</a> ·
+  <a href="#license">License</a>
+</p>
 
 ---
 
 ## Quickstart
 
-To get started with Omega, run the command below:
+Rust 2024 Cargo workspace. The CLI binary is **`aimee`** (`crates/aimee_main`). Workspace version `0.1.0`. Pinned toolchain Rust `1.97` (MSRV `1.94`).
 
 ```bash
-curl -fsSL https://omegaloops.dev/cli | sh
+# Nix (Linux and macOS: x86_64 and aarch64)
+nix run github:swcstudiospace/omegaloops
+
+# From a local checkout
+cargo install --path crates/aimee_main --locked --bin aimee
+
+aimee provider login    # interactive provider credentials
+aimee                   # start the TUI
+aimee setup             # optional: install the ZSH `:` prefix plugin
 ```
 
-On first run, Omega will guide you through setting up your AI provider credentials using the interactive login flow. Alternatively, you can configure providers beforehand:
-
-```bash
-# Configure your provider credentials interactively
-omega provider login
-
-# Then start Omega
-omega
-```
-That's it! Omega is now ready to assist you with your development tasks.
-
-## Usage Examples
-
-Omega can be used in different ways depending on your needs. Here are some common usage patterns:
-
-<details>
-<summary><strong>Code Understanding</strong></summary>
-
-```
-> Can you explain how the authentication system works in this codebase?
-```
-
-Omega will analyze your project's structure, identify authentication-related files, and provide a detailed explanation of the authentication flow, including the relationships between different components.
-
-</details>
-
-<details>
-<summary><strong>Implementing New Features</strong></summary>
-
-```
-> I need to add a dark mode toggle to our React application. How should I approach this?
-```
-
-Omega will suggest the best approach based on your current codebase, explain the steps needed, and even scaffold the necessary components and styles for you.
-
-</details>
-
-<details>
-<summary><strong>Debugging Assistance</strong></summary>
-
-```
-> I'm getting this error: "TypeError: Cannot read property 'map' of undefined". What might be causing it?
-```
-
-Omega will analyze the error, suggest potential causes based on your code, and propose different solutions to fix the issue.
-
-</details>
-
-<details>
-<summary><strong>Code Reviews</strong></summary>
-
-```
-> Please review the code in src/components/UserProfile.js and suggest improvements
-```
-
-Omega will analyze the code, identify potential issues, and suggest improvements for readability, performance, security, and maintainability.
-
-</details>
-
-<details>
-<summary><strong>Learning New Technologies</strong></summary>
-
-```
-> I want to integrate GraphQL into this Express application. Can you explain how to get started?
-```
-
-Omega will provide a tailored tutorial on integrating GraphQL with Express, using your specific project structure as context.
-
-</details>
-
-<details>
-<summary><strong>Database Schema Design</strong></summary>
-
-```
-> I need to design a database schema for a blog with users, posts, comments, and categories
-```
-
-Omega will suggest an appropriate schema design, including tables/collections, relationships, indexes, and constraints based on your project's existing database technology.
-
-</details>
-
-<details>
-<summary><strong>Refactoring Legacy Code</strong></summary>
-
-```
-> Help me refactor this class-based component to use React Hooks
-```
-
-Omega can help modernize your codebase by walking you through refactoring steps and implementing them with your approval.
-
-</details>
-
-<details>
-<summary><strong>Git Operations</strong></summary>
-
-```
-> I need to merge branch 'feature/user-profile' into main but there are conflicts
-```
-
-Omega can guide you through resolving git conflicts, explaining the differences and suggesting the best way to reconcile them.
-
-</details>
-
-## Why Omega Loops?
-
-Omega Loops is designed for developers who want to enhance their workflow with AI assistance while maintaining full control over their development environment.
-
-- **Zero configuration** - Just add your API key and you're ready to go
-- **Seamless integration** - Works right in your terminal, where you already work
-- **Multi-provider support** - Use OpenAI, Anthropic, or other LLM providers
-- **Secure by design** - Restricted shell mode limits file system access and prevents unintended changes
-- **Open-source** - Transparent, extensible, and community-driven
-- **WEB3-native** - Wallet-aware identity, on-chain workflows, and a PWA surface for browser and mobile
-
-Omega Loops helps you code faster, solve complex problems, and learn new technologies without leaving your terminal.
+On first run, Aimee walks you through provider login if no credentials are stored. Config lives in `~/.aimee` (see [Configuration](#configuration)). Existing `~/.omega` directories are still picked up until you migrate.
 
 ---
 
-## How Omega Loops Works: Three Modes
+## The flock
 
-Omega Loops has three distinct ways to use it. Understanding this distinction upfront will save you confusion.
+Three built-in agents. One product loop.
 
-### Interactive Mode (TUI)
-
-Running `omega` with no arguments starts the interactive terminal UI — a vibrant ratatui-themed session where you type prompts and the AI responds in a conversational loop. This is the primary way to do multi-step work.
-
-```bash
-omega                              # Start a new interactive session
-omega conversation resume <id>     # Resume a specific saved conversation in interactive mode
-omega --conversation-id <id>       # Same: resume conversation by ID
-omega --agent <agent-id>           # Start interactive session with a specific agent
-omega -C /path/to/project          # Start in a specific directory
-omega --sandbox experiment-name    # Create an isolated git worktree + branch, then start there
-```
-
-Once inside interactive mode, type your prompt and press Enter. Omega reads files, writes patches, runs commands, and maintains context across the whole session.
-
-### One-Shot CLI Mode
-
-Pass `-p` (or `--prompt`) to run a single prompt and exit. Omega does the work and returns to your shell. Useful for scripts, piping output, or quick tasks.
-
-```bash
-omega -p "Explain the purpose of src/main.rs"
-omega -p "Add error handling to the parse() function in lib.rs"
-echo "What does this do?" | omega    # Pipe input as the prompt
-omega commit                         # Generate an AI commit message and commit (exits when done)
-omega commit --preview               # Generate commit message, print it, then exit
-omega suggest "find large log files" # Translate natural language to a shell command, then exit
-```
-
-> **Note:** `omega conversation resume <id>` opens the interactive TUI. It does **not** just print a message and exit. If you run it and see the cursor waiting, you are inside the interactive session. Type your prompt or press `Ctrl+C` to exit.
-
-### ZSH Plugin Mode (`:` prefix)
-
-Install the ZSH plugin once with `omega setup`, then use `:` commands directly at your shell prompt without ever typing `omega`. This is the fastest mode for day-to-day development: send prompts, switch conversations, commit, and suggest commands without leaving your shell.
+| | Agent | Alias | Role | Writes? |
+|---|---|---|---|---|
+| **Sage** | `sage` | `:ask` | Research, architecture, reviews | No |
+| **Muse** | `muse` | `:plan` | Plans as checkbox files in `plans/` | Plans only |
+| **Aimee** | `aimee` | `:act` | Implement, verify, report evidence | Yes |
 
 ```zsh
-: refactor the auth module      # Send a prompt to the active agent
-:commit                         # AI-powered git commit
-:suggest "find large log files" # Translate description → shell command in your buffer
-:conversation                   # Browse saved conversations with interactive picker
+: sage how does the caching layer work?
+: muse design a deployment strategy
+: aimee implement the plan in plans/2026-08-21-caching-v1.md
 ```
 
-See the full [ZSH Plugin reference below](#zsh-plugin-the--prefix-system) for all commands and aliases.
+Custom agents live in `.aimee/agents/` (project) or `~/.aimee/agents/` (global). Built-in definitions are in `crates/aimee_repo/src/agents/`.
+
+**Why this flock**
+
+- **Terminal-native** — ratatui TUI, one-shot CLI, and a ZSH `:` prefix that never leaves your prompt.
+- **Multi-provider** — 42 built-in providers including OpenAI, Anthropic, OpenRouter, GitHub Copilot, Vertex, Bedrock, xAI / SuperGrok (`xai_oauth`), Claude Code, Codex, Google AI Studio, Moonshot, and OpenAI-compatible endpoints. `aimee provider list` is the source of truth.
+- **Project policy** — `AGENTS.md`, custom agents, skills, and commands travel with the repo.
+- **Secure by design** — restricted mode, credentials in `.credentials.json` (not git), no secrets in logs or commits.
+- **WEB3-aware** — Anda/KIP hash-chained session pathways, optional ICP durability, wallet-aware PWA shell (spend stays HITL).
 
 ---
 
-## ZSH Plugin: The `:` Prefix System
+## Three modes
 
-When you install the ZSH plugin (`omega setup`), you get a `:` prefix command system at your shell prompt. This is the fastest way to use Omega during normal development; you never leave your shell.
+### Interactive (TUI)
 
-**How it works:** Lines starting with `:` are intercepted before the shell sees them and routed to Omega. Everything else runs normally.
-
-```zsh
-: <prompt>         # Send a prompt to the active agent
-:sage <prompt>     # Send a prompt to a specific agent by name (sage, muse, omega, or any custom agent)
-:agent <name>      # Switch the active agent; opens interactive picker if no name given
+```bash
+aimee                              # new interactive session
+aimee conversation resume <id>     # resume a saved conversation
+aimee --conversation-id <id>       # same: resume by ID
+aimee --agent sage                 # start with a specific agent
+aimee -C /path/to/project          # start in a specific directory
+aimee --sandbox experiment-name    # isolated git worktree + branch
 ```
 
-### Agents
+### One-shot CLI
 
-Omega ships with three built-in agents, each with a different role:
-
-| Agent | Alias | Purpose | Modifies files? |
-|---|---|---|---|
-| `omega` | (default) | Implementation: builds features, fixes bugs, and runs tests | Yes |
-| `sage` | `:ask` | Research: maps architecture, traces data flow, and reads code | No |
-| `muse` | `:plan` | Planning: analyzes structure and writes implementation plans to `plans/` | No |
-
-### Sending Prompts
-
-```zsh
-: refactor the auth module to use the new middleware
-:sage how does the caching layer work?    # sage = read-only research agent
-:muse design a deployment strategy        # muse = planning agent (writes to plans/)
-:ask how does X work?                     # alias for :sage
-:plan create a migration plan             # alias for :muse
+```bash
+aimee -p "Explain the purpose of src/main.rs"
+echo "What does this do?" | aimee
+aimee commit                       # AI commit message, then commit
+aimee commit --preview             # print the message and exit
+aimee suggest "find large log files"
 ```
 
-The agent context persists. Typing `:sage` alone (no prompt text) switches the active agent to sage for all subsequent `: <prompt>` commands.
+### ZSH `:` prefix
 
-### Attaching Files
+Install once with `aimee setup`. Lines that start with `:` are routed to Aimee; everything else is a normal shell command.
 
-Type `@` in a prompt, then press Tab to fuzzy-search and select files. The path is inserted as `@[filename]` and attached as context to the AI.
+```zsh
+: refactor the auth module
+:commit
+:suggest "find large log files"
+:conversation
+```
+
+<details>
+<summary><strong>ZSH plugin reference</strong></summary>
+
+A line starting with `:` is rewritten to an `aimee` invocation before the shell runs it.
+
+```zsh
+: <prompt>         # send a prompt to the active agent
+:sage <prompt>     # research agent
+:muse <prompt>     # planning agent
+:aimee <prompt>    # implementer (alias: :act)
+:agent <name>      # switch active agent (picker if omitted)
+```
+
+**Attach files:** type `@` then Tab to fuzzy-select. Paths are inserted as `@[filename]`.
 
 ```zsh
 : review this code @[src/auth.rs] @[tests/auth_test.rs]
 ```
 
-### Conversation Management
-
-Omega saves every conversation. You can switch between them like switching directories.
+#### Conversations
 
 ```zsh
-:new                      # Start a fresh conversation (saves current for :conversation -)
-:new <initial prompt>     # Start a new conversation and immediately send a prompt
-:conversation             # Open interactive picker: browse and switch conversations with preview
-:conversation <id>        # Switch directly to a conversation by ID
-:conversation -           # Toggle between current and previous conversation (like cd -)
-:clone                    # Branch the current conversation (try a different direction)
-:clone <id>               # Clone a specific conversation by ID
-:rename <name>            # Rename the current conversation
-:conversation-rename      # Rename a conversation via interactive picker
-:retry                    # Retry the last prompt (useful if the AI misunderstood)
-:copy                     # Copy the last AI response to clipboard as markdown
-:dump                     # Export conversation as JSON
-:dump html                # Export conversation as formatted HTML
-:compact                  # Manually compact context to free up token budget
+:new                      # fresh conversation (alias: :n)
+:conversation             # interactive picker (alias: :c)
+:conversation -           # toggle previous (like cd -)
+:clone                    # branch a conversation
+:rename <name>            # rename current (alias: :rn)
+:retry                    # retry last prompt (alias: :r)
+:copy                     # last assistant reply to clipboard
+:dump                     # export JSON (alias: :d)
+:compact                  # compact context
 ```
 
-### Git Integration
+#### Git, shell, session
 
 ```zsh
-:commit                   # AI reads your diff, writes a commit message, and commits immediately
-:commit <context>         # Same, but pass extra context: :commit fix typo in readme
-:commit-preview           # AI generates the message and puts "git commit -m '...'" in your buffer
-                          # so you can review/edit the message before pressing Enter
+:commit                   # AI message + commit
+:suggest <description>    # natural language → command in the buffer
+:edit                     # compose a multi-line prompt in $EDITOR
+
+# Session-only (reset when the terminal closes)
+:model <model-id>              # alias: :m
+:reasoning-effort <lvl>        # alias: :re
+:agent <id>                    # alias: :a
+
+# Persistent (written to ~/.aimee/.aimee.toml)
+:config-model                  # alias: :cm
+:config-reload                 # alias: :cr
+:info                          # session info (alias: :i)
+:login                         # provider login
+:supergrok                     # SuperGrok OAuth (`xai_oauth`)
+:sync                          # index the cwd for semantic search
 ```
 
-### Shell Command Tools
+Indexing talks to the workspace server (`https://api.aimeecodes.dev/` by default). Override with `AIMEE_SERVICES_URL`.
 
-```zsh
-:suggest <description>    # Translate natural language to a shell command and put it in your buffer
-:edit                     # Open $EDITOR to compose a complex multi-line prompt, then send it
-```
-
-### Session & Configuration
-
-Some commands change settings for the current session only. Others persist to your config file (`~/omega/.omega.toml`). The distinction matters:
-
-```zsh
-# Session-only (reset when you close the terminal; not saved to config)
-:model <model-id>              # Change model for this session only
-:reasoning-effort <level>      # Set reasoning effort: none/minimal/low/medium/high/xhigh/max
-:agent <id>                    # Switch active agent for this session
-
-# Persistent (saved to config file)
-:config-model <model-id>       # Set default model globally  (alias: :cm)
-:config-provider               # Switch provider globally    (alias: :provider, :p)
-:config-reasoning-effort <lvl> # Set default reasoning effort globally (alias: :cre)
-:config-commit-model <id>      # Set model used for :commit  (alias: :ccm)
-:config-suggest-model <id>     # Set model used for :suggest (alias: :csm)
-:config-reload                 # Reset session overrides back to global config (alias: :cr)
-
-# View & edit config
-:info                          # Show current session info (model, agent, conversation ID)
-:config                        # Display effective resolved configuration in TOML format
-:config-edit                   # Open config file in $EDITOR (alias: :ce)
-:tools                         # List available tools for the current agent
-:skill                         # List available skills
-```
-
-### Skills
-
-Skills are reusable workflows the AI can invoke as tools. Omega ships three built-in skills:
-
-- **`create-skill`**: scaffold a new custom skill
-- **`execute-plan`**: execute a plan file from `plans/`
-- **`github-pr-description`**: generate a PR description from your diff
-
-Use `:skill` to list available skills. The AI invokes them automatically when relevant, or you can ask explicitly: `: generate a PR description using the github-pr-description skill`.
-
-**Custom skills** live in `SKILL.md` files with YAML front-matter. Precedence (highest first):
-
-| Location | Path | Scope |
-|---|---|---|
-| Project-local | `.omega/skills/<name>/SKILL.md` | This project only |
-| Global | `~/omega/skills/<name>/SKILL.md` | All projects |
-| Built-in | Embedded in binary | Always available |
-
-Project-local skills override global ones, which override built-in ones. To scaffold a new skill, ask: `: create a new skill`.
-
-### Customizing Agent Behavior
-
-**`AGENTS.md`:** Create this file in your project root (or `~/omega/AGENTS.md` globally) to give all agents persistent instructions such as coding conventions, commit message style, and things to avoid. Omega reads it automatically at the start of every conversation.
-
-**Custom agents:** Place a `.md` file with YAML front-matter in `.omega/agents/` (project) or `~/omega/agents/` (global) to define additional agents with their own models, tools, and system prompts. Project-local agents override global ones. The built-in agent files in `crates/omega_repo/src/agents/` are good examples of the format.
-
-**Custom commands:** Place YAML files in `.omega/commands/` (project) or `~/omega/commands/` (global) to define shortcut commands available via `:commandname`. Commands can also be defined inline in `omega.yaml` under the `commands:` key.
-
-### Semantic Search (Workspace)
-
-```zsh
-:sync                     # Index your codebase for semantic search
-:workspace-init           # Initialize workspace for indexing
-:workspace-status         # Show indexing status
-:workspace-info           # Show workspace details
-```
-
-After running `:sync`, the AI can search your codebase by meaning rather than exact text matches. Indexing sends file content to the workspace server, which defaults to `https://api.omegaloops.dev`. Set `OMEGA_WORKSPACE_SERVER_URL` to override this if self-hosting.
-
-### Quick Reference: All `:` Commands
-
-
-| Command | Alias | What it does |
-|---|---|---|
-| `: <prompt>` | | Send prompt to active agent |
-| `:new` | `:n` | Start new conversation |
-| `:conversation` | `:c` | Browse/switch conversations (interactive picker) |
-| `:conversation -` | | Toggle to previous conversation |
-| `:clone` | | Branch current conversation |
-| `:rename <name>` | `:rn` | Rename current conversation |
-| `:conversation-rename` | | Rename conversation (interactive picker) |
-| `:retry` | `:r` | Retry last prompt |
-| `:copy` | | Copy last response to clipboard |
-| `:dump` | `:d` | Export conversation as JSON |
-| `:compact` | | Compact context |
-| `:commit` | | AI commit (immediate) |
-| `:commit-preview` | | AI commit (review first) |
-| `:suggest <desc>` | `:s` | Translate natural language to command |
-| `:edit` | `:ed` | Compose prompt in $EDITOR |
-| `:sage <prompt>` | `:ask` | Q&A / code understanding agent |
-| `:muse <prompt>` | `:plan` | Planning agent |
-| `:agent <name>` | `:a` | Switch active agent (interactive picker if no name given) |
-| `:model <id>` | `:m` | Set model for this session only |
-| `:config-model <id>` | `:cm` | Set default model (persistent) |
-| `:reasoning-effort <lvl>` | `:re` | Set reasoning effort for session |
-| `:config-reload` | `:cr` | Reset session overrides to global config |
-| `:info` | `:i` | Show session info |
-| `:sync` | `:workspace-sync` | Index codebase for semantic search |
-| `:tools` | `:t` | List available tools |
-| `:skill` | | List available skills |
-| `:login` | `:provider-login` | Login to a provider |
-| `:logout` | | Logout from a provider |
-| `:keyboard-shortcuts` | `:kb` | Show keyboard shortcuts |
-| `:doctor` | | Run shell environment diagnostics |
-
----
-
-## Command-Line Options
-
-Here's a quick reference of Omega's command-line options:
-
-| Option                              | Description                                                              |
-| ----------------------------------- | ------------------------------------------------------------------------ |
-| `-p, --prompt <PROMPT>`             | Direct prompt to process without entering interactive mode               |
-| `-e, --event <EVENT>`               | Dispatch an event to the workflow in JSON format                         |
-| `--conversation <CONVERSATION>`     | Path to a JSON file containing the conversation to execute               |
-| `--conversation-id <ID>`            | Resume or continue an existing conversation by ID                        |
-| `--agent <AGENT>`                   | Agent ID to use for this session                                         |
-| `-C, --directory <DIR>`             | Change to this directory before starting                                 |
-| `--sandbox <NAME>`                  | Create an isolated git worktree + branch for safe experimentation        |
-| `--verbose`                         | Enable verbose logging output                                            |
-| `-h, --help`                        | Print help information                                                   |
-| `-V, --version`                     | Print version                                                            |
-
-### Subcommands
-
-```bash
-# Conversations
-omega conversation list                  # List all saved conversations
-omega conversation resume <id>           # Resume a conversation in interactive mode
-omega conversation new                   # Create a new conversation ID (prints it)
-omega conversation dump <id>             # Export conversation as JSON
-omega conversation compact <id>          # Compact conversation context
-omega conversation retry <id>            # Retry last message
-omega conversation clone <id>            # Clone a conversation
-omega conversation rename <id> <name>    # Rename a conversation
-omega conversation delete <id>           # Delete a conversation permanently
-omega conversation info <id>             # Show conversation details
-omega conversation stats <id>            # Show token usage statistics
-omega conversation show <id>             # Show last assistant message
-
-# Commits
-omega commit                             # Generate AI commit message and commit
-omega commit --preview                   # Generate commit message only (prints it)
-omega commit fix the auth bug            # Pass extra context for the commit message
-
-# Shell command suggestion
-omega suggest "list files by size"       # Translate description to a shell command
-
-# Providers
-omega provider login                     # Add or update provider credentials (interactive)
-omega provider logout                    # Remove provider credentials
-omega list provider                      # List supported providers
-
-# Models & agents
-omega list model                         # List available models
-omega list agent                         # List available agents
-
-# Workspace / semantic search
-omega workspace sync                     # Index current directory for semantic search
-omega workspace init                     # Initialize workspace
-omega workspace status                   # Show indexing status
-omega workspace query <text>             # Query the semantic index
-
-# MCP servers
-omega mcp list                           # List configured MCP servers
-omega mcp import                         # Add a server from JSON
-omega mcp show                           # Show server configuration
-omega mcp remove                         # Remove a server
-omega mcp reload                         # Reload all servers and rebuild caches
-
-# Other
-omega info                               # Show config, active model, environment
-omega list tool --agent <id>             # List tools for a specific agent
-omega doctor                             # Run shell environment diagnostics
-omega update                             # Update omega to the latest version
-omega setup                              # Install ZSH plugin (updates .zshrc)
-```
-
-## Advanced Configuration
-
-### Provider Configuration
-
-Omega supports multiple AI providers. The recommended way to configure providers is using the interactive login command:
-
-```bash
-omega provider login
-```
-
-This will:
-
-1. Show you a list of available providers
-2. Guide you through entering the required credentials
-
-#### Managing Provider Credentials
-
-```bash
-# Login to a provider (add or update credentials)
-omega provider login
-
-# Remove provider credentials
-omega provider logout
-
-# List supported providers
-omega provider list
-```
-
-#### Deprecated: Environment Variables
-
-> **⚠️ DEPRECATED**: Using `.env` files for provider configuration is deprecated and will be removed in a future version. Please use `omega provider login` instead.
-
-For backward compatibility, Omega still supports environment variables. On first run, any credentials found in environment variables will be automatically migrated to file-based storage.
-
-<details>
-<summary><strong>Legacy Environment Variable Setup (Deprecated)</strong></summary>
-
-<details>
-<summary><strong>OpenRouter</strong></summary>
-
-```bash
-# .env
-OPENROUTER_API_KEY=<your_openrouter_api_key>
-```
-
-</details>
-
-<details>
-<summary><strong>Requesty</strong></summary>
-
-```bash
-# .env
-REQUESTY_API_KEY=<your_requesty_api_key>
-```
-
-</details>
-
-<details>
-<summary><strong>x-ai</strong></summary>
-
-```bash
-# .env
-XAI_API_KEY=<your_xai_api_key>
-```
-
-</details>
-
-<details>
-<summary><strong>z.ai</strong></summary>
-
-```bash
-# .env
-ZAI_API_KEY=<your_zai_api_key>
-
-# Or for coding plan subscription
-ZAI_CODING_API_KEY=<your_zai_coding_api_key>
-```
-
-</details>
-
-<details>
-<summary><strong>Cerebras</strong></summary>
-
-```bash
-# .env
-CEREBRAS_API_KEY=<your_cerebras_api_key>
-```
-
-</details>
-
-<details>
-<summary><strong>Neuralwatt</strong></summary>
-
-```bash
-# .env
-NEURALWATT_API_KEY=<your_neuralwatt_api_key>
-```
-
-</details>
-
-<details>
-<summary><strong>OrcaRouter</strong></summary>
-
-```bash
-# .env
-ORCAROUTER_API_KEY=<your_orcarouter_api_key>
-```
-
-</details>
-
-<details>
-<summary><strong>Meta</strong></summary>
-
-```bash
-# .env
-META_API_KEY=<your_meta_model_api_key>
-```
-
-```yaml
-# omega.yaml
-model: muse-spark-1.1
-```
-
-</details>
-
-<details>
-<summary><strong>IO Intelligence</strong></summary>
-
-```bash
-# .env
-IO_INTELLIGENCE_API_KEY=<your_io_intelligence_api_key>
-```
-
-```yaml
-# omega.yaml
-model: meta-llama/Llama-3.3-70B-Instruct
-```
-
-</details>
-
-<details>
-<summary><strong>OpenAI</strong></summary>
-
-```bash
-# .env
-OPENAI_API_KEY=<your_openai_api_key>
-```
-
-```yaml
-# omega.yaml
-model: o3-mini-high
-```
-
-</details>
-
-<details>
-<summary><strong>Anthropic</strong></summary>
-
-```bash
-# .env
-ANTHROPIC_API_KEY=<your_anthropic_api_key>
-```
-
-```yaml
-# omega.yaml
-model: claude-3.7-sonnet
-```
-
-</details>
-
-<details>
-<summary><strong>Google Vertex AI</strong></summary>
-
-**Setup Instructions:**
-
-1. **Install Google Cloud CLI** and authenticate:
-
-   ```bash
-   gcloud auth login
-   gcloud config set project YOUR_PROJECT_ID
-   ```
-
-2. **Get your authentication token**:
-
-   ```bash
-   gcloud auth print-access-token
-   ```
-
-3. **Use the token when logging in via Omega**:
-
-   ```bash
-   omega provider login
-   # Select Google Vertex AI and enter your credentials
-   ```
-
-**Legacy `.env` setup:**
-
-```bash
-# .env
-PROJECT_ID=<your_project_id>
-LOCATION=<your_location>
-VERTEX_AI_AUTH_TOKEN=<your_auth_token>
-```
-
-```yaml
-# omega.yaml
-model: google/gemini-2.5-pro
-```
-
-**Available Models:**
-- Claude models: `claude-sonnet-4@20250514`
-- Gemini models: `gemini-2.5-pro`, `gemini-2.0-flash`
-
-Use the `/model` command in Omega CLI to see all available models.
-
-</details>
-
-<details>
-<summary><strong>OpenAI-Compatible Providers</strong></summary>
-
-```bash
-# .env
-OPENAI_API_KEY=<your_provider_api_key>
-OPENAI_URL=<your_provider_url>
-```
-
-```yaml
-# omega.yaml
-model: <provider-specific-model>
-```
-
-</details>
-
-<details>
-<summary><strong>Groq</strong></summary>
-
-```bash
-# .env
-OPENAI_API_KEY=<your_groq_api_key>
-OPENAI_URL=https://api.groq.com/openai/v1
-```
-
-```yaml
-# omega.yaml
-model: deepseek-r1-distill-llama-70b
-```
-
-</details>
-
-<details>
-<summary><strong>Amazon Bedrock</strong></summary>
-
-To use Amazon Bedrock models with Omega, you'll need to first set up the [Bedrock Access Gateway](https://github.com/aws-samples/bedrock-access-gateway):
-
-1. **Set up Bedrock Access Gateway**:
-
-   - Follow the deployment steps in the [Bedrock Access Gateway repo](https://github.com/aws-samples/bedrock-access-gateway)
-   - Create your own API key in Secrets Manager
-   - Deploy the CloudFormation stack
-   - Note your API Base URL from the CloudFormation outputs
-
-2. **Configure in Omega**:
-
-   ```bash
-   omega provider login
-   # Select OpenAI-compatible provider and enter your Bedrock Gateway details
-   ```
-
-**Legacy `.env` setup:**
-
-```bash
-# .env
-OPENAI_API_KEY=<your_bedrock_gateway_api_key>
-OPENAI_URL=<your_bedrock_gateway_base_url>
-```
-
-```yaml
-# omega.yaml
-model: anthropic.claude-3-opus
-```
-
-</details>
-
-<details>
-<summary><strong>OmegaLoops Services</strong></summary>
-
-```bash
-# .env
-OMEGA_API_KEY=<your_omega_api_key>
-```
-
-```yaml
-# omega.yaml
-model: claude-3.7-sonnet
-```
-
-</details>
+Plugin source: `shell-plugin/`. File tagging (`@` + Tab) uses `aimee select file`. Keyboard shortcuts: `aimee zsh keyboard`. Shell diagnostics: `aimee doctor`.
 
 </details>
 
 ---
 
-### omega.yaml Configuration Options
+## Command-line
 
-### Environment Variables
-
-Omega supports several environment variables for advanced configuration and fine-tuning. These can be set in your `.env` file or system environment.
+| Option | Description |
+| --- | --- |
+| `-p, --prompt <PROMPT>` | One-shot prompt (no TUI) |
+| `-e, --event <EVENT>` | Dispatch a workflow event as JSON |
+| `--conversation <PATH>` | Execute a conversation from a JSON file |
+| `--conversation-id <ID>` | Resume a conversation by ID (alias: `--cid`) |
+| `--agent <AGENT>` | Agent ID for this session (alias: `--aid`) |
+| `-C, --directory <DIR>` | `chdir` before start |
+| `--sandbox <NAME>` | Isolated git worktree + branch |
+| `--verbose` | Verbose logs |
+| `-h, --help` | Help |
+| `-V, --version` | Version (`0.1.0` from the workspace) |
 
 <details>
-<summary><strong>Retry Configuration</strong></summary>
-
-Control how Omega handles retry logic for failed requests:
+<summary><strong>Subcommands</strong></summary>
 
 ```bash
-# .env
-OMEGA_RETRY_INITIAL_BACKOFF_MS=1000    # Initial backoff time in milliseconds (default: 1000)
-OMEGA_RETRY_BACKOFF_FACTOR=2           # Multiplier for backoff time (default: 2)
-OMEGA_RETRY_MAX_ATTEMPTS=3             # Maximum retry attempts (default: 3)
-OMEGA_SUPPRESS_RETRY_ERRORS=false      # Suppress retry error messages (default: false)
-OMEGA_RETRY_STATUS_CODES=429,500,502   # HTTP status codes to retry (default: 429,500,502,503,504)
+aimee conversation list
+aimee conversation resume <id>
+aimee conversation pathway <id> list     # Anda hash-chained checkpoints
+
+aimee commit
+aimee commit --preview
+aimee suggest "list files by size"
+
+aimee provider login
+aimee provider list
+aimee list model
+aimee list agent
+aimee list skill
+aimee list tool aimee
+
+aimee config list
+aimee config path
+aimee config get model
+aimee config set model <provider> <model>
+aimee config migrate                     # ~/aimee, ~/.omega, or ~/omega → ~/.aimee
+
+aimee workspace sync
+aimee workspace query <text> -r "<use case>"
+
+aimee mcp list
+aimee mcp import '<json>'
+
+aimee info
+aimee doctor
+aimee update
+aimee setup
+aimee banner
+aimee select model
+aimee agent list
 ```
-
-</details>
-
-<details>
-<summary><strong>HTTP Configuration</strong></summary>
-
-Fine-tune HTTP client behavior for API requests:
-
-```bash
-# .env
-OMEGA_HTTP_CONNECT_TIMEOUT=30              # Connection timeout in seconds (default: 30)
-OMEGA_HTTP_READ_TIMEOUT=900                # Read timeout in seconds (default: 900)
-OMEGA_HTTP_POOL_IDLE_TIMEOUT=90            # Pool idle timeout in seconds (default: 90)
-OMEGA_HTTP_POOL_MAX_IDLE_PER_HOST=5        # Max idle connections per host (default: 5)
-OMEGA_HTTP_MAX_REDIRECTS=10                # Maximum redirects to follow (default: 10)
-OMEGA_HTTP_USE_HICKORY=false               # Use Hickory DNS resolver (default: false)
-OMEGA_HTTP_TLS_BACKEND=default             # TLS backend: "default" or "rustls" (default: "default")
-OMEGA_HTTP_MIN_TLS_VERSION=1.2             # Minimum TLS version: "1.0", "1.1", "1.2", "1.3"
-OMEGA_HTTP_MAX_TLS_VERSION=1.3             # Maximum TLS version: "1.0", "1.1", "1.2", "1.3"
-OMEGA_HTTP_ADAPTIVE_WINDOW=true            # Enable HTTP/2 adaptive window (default: true)
-OMEGA_HTTP_KEEP_ALIVE_INTERVAL=60          # Keep-alive interval in seconds (default: 60, use "none"/"disabled" to disable)
-OMEGA_HTTP_KEEP_ALIVE_TIMEOUT=10           # Keep-alive timeout in seconds (default: 10)
-OMEGA_HTTP_KEEP_ALIVE_WHILE_IDLE=true      # Keep-alive while idle (default: true)
-OMEGA_HTTP_ACCEPT_INVALID_CERTS=false      # Accept invalid certificates (default: false) - USE WITH CAUTION
-OMEGA_HTTP_ROOT_CERT_PATHS=/path/to/cert1.pem,/path/to/cert2.crt  # Paths to root certificate files (PEM, CRT, CER format), multiple paths separated by commas
-```
-
-> **⚠️ Security Warning**: Setting `OMEGA_HTTP_ACCEPT_INVALID_CERTS=true` disables SSL/TLS certificate verification, which can expose you to man-in-the-middle attacks. Only use this in development environments or when you fully trust the network and endpoints.
-
-</details>
-
-<details>
-<summary><strong>API Configuration</strong></summary>
-
-Override default API endpoints and provider/model settings:
-
-```bash
-# .env
-OMEGA_API_URL=https://api.omegaloops.dev  # Custom Omega API URL (default: https://api.omegaloops.dev)
-OMEGA_WORKSPACE_SERVER_URL=http://localhost:8080  # URL for the indexing server (default: https://api.omegaloops.dev/)
-```
-
-</details>
-
-<details>
-<summary><strong>Tool Configuration</strong></summary>
-
-Configuring the tool calls settings:
-
-```bash
-# .env
-OMEGA_TOOL_TIMEOUT=300         # Maximum execution time in seconds for a tool before it is terminated to prevent hanging the session. (default: 300)
-OMEGA_MAX_IMAGE_SIZE=10485760  # Maximum image file size in bytes for read_image operations (default: 10485760 - 10 MB)
-OMEGA_DUMP_AUTO_OPEN=false     # Automatically open dump files in browser (default: false)
-OMEGA_DEBUG_REQUESTS=/path/to/debug/requests.json  # Write debug HTTP request files to specified path (supports absolute and relative paths)
-```
-
-</details>
-
-<details>
-<summary><strong>ZSH Plugin Configuration</strong></summary>
-
-Configure the ZSH plugin behavior:
-
-```bash
-# .env
-OMEGA_BIN=omega                    # Command to use for omega operations (default: "omega")
-```
-
-The `OMEGA_BIN` environment variable allows you to customize the command used by the ZSH plugin when transforming `:` prefixed commands. If not set, it defaults to `"omega"`.
-
-</details>
-
-<details>
-<summary><strong>Display Configuration</strong></summary>
-
-Configure display options for the Omega UI and ZSH theme:
-
-```bash
-# .env
-OMEGA_CURRENCY_SYMBOL="$"         # Currency symbol for cost display in ZSH theme (default: "$")
-OMEGA_CURRENCY_CONVERSION_RATE=1.0  # Conversion rate for currency display (default: 1.0)
-NERD_FONT=1                       # Enable Nerd Font icons in ZSH theme (default: auto-detected, set to "1" or "true" to enable, "0" or "false" to disable)
-USE_NERD_FONT=1                   # Alternative variable for enabling Nerd Font icons (same behavior as NERD_FONT)
-```
-
-The `OMEGA_CURRENCY_SYMBOL` and `OMEGA_CURRENCY_CONVERSION_RATE` variables control how costs are displayed in the ZSH theme right prompt. Use these to customize the currency display for your region or preferred currency.
-
-</details>
-
-<details>
-<summary><strong>System Configuration</strong></summary>
-
-System-level environment variables (usually set automatically):
-
-```bash
-# .env
-OMEGA_CONFIG=/custom/config/dir        # Base directory for all Omega config files (default: ~/.omega)
-OMEGA_MAX_SEARCH_RESULT_BYTES=10240   # Maximum bytes for search results (default: 10240 - 10 KB)
-OMEGA_HISTORY_FILE=/path/to/history    # Custom path for Omega history file (default: uses system default location)
-OMEGA_BANNER="Your custom banner text" # Custom banner text to display on startup (default: Omega ASCII art)
-OMEGA_MAX_CONVERSATIONS=100            # Maximum number of conversations to show in list (default: 100)
-OMEGA_MAX_LINE_LENGTH=2000             # Maximum characters per line for file read operations (default: 2000)
-OMEGA_STDOUT_MAX_LINE_LENGTH=2000      # Maximum characters per line for shell output (default: 2000)
-SHELL=/bin/zsh                         # Shell to use for command execution (Unix/Linux/macOS)
-COMSPEC=cmd.exe                        # Command processor to use (Windows)
-```
-
-</details>
-
-<details>
-<summary><strong>Semantic Search Configuration</strong></summary>
-
-Configure semantic search behavior for code understanding:
-
-```bash
-# .env
-OMEGA_SEM_SEARCH_LIMIT=200            # Maximum number of results to return from initial vector search (default: 200)
-OMEGA_SEM_SEARCH_TOP_K=20             # Top-k parameter for relevance filtering during semantic search (default: 20)
-```
-
-</details>
-
-<details>
-<summary><strong>Logging Configuration</strong></summary>
-
-Configure logging verbosity and output:
-
-```bash
-# .env
-OMEGA_LOG=omega=info                  # Log filter level (default: omega=debug when tracking disabled, omega=info when tracking enabled)
-```
-
-The `OMEGA_LOG` variable controls the logging level for Omega's internal operations using the standard tracing filter syntax. Common values:
-- `omega=error` - Only errors
-- `omega=warn` - Warnings and errors
-- `omega=info` - Informational messages (default when tracking enabled)
-- `omega=debug` - Debug information (default when tracking disabled)
-- `omega=trace` - Detailed tracing
-
-</details>
-
-<details>
-<summary><strong>Tracking Configuration</strong></summary>
-
-Control tracking of user-identifying metadata in telemetry events:
-
-```bash
-# .env
-OMEGA_TRACKER=false                   # Disable tracking enrichment metadata (default: true)
-```
-
-The `OMEGA_TRACKER` variable controls whether tracking enrichment metadata is included in telemetry events.
-
-</details>
-
-The `omega.yaml` file supports several advanced configuration options that let you customize Omega's behavior.
-
-<details>
-<summary><strong>Custom Rules</strong></summary>
-
-Add your own guidelines that all agents should follow when generating responses.
-
-```yaml
-# omega.yaml
-custom_rules: |
-  1. Always add comprehensive error handling to any code you write.
-  2. Include unit tests for all new functions.
-  3. Follow our team's naming convention: camelCase for variables, PascalCase for classes.
-```
-
-</details>
-
-<details>
-<summary><strong>Commands</strong></summary>
-
-Define custom commands as shortcuts for repetitive prompts:
-
-```yaml
-# omega.yaml
-commands:
-  - name: "refactor"
-    description: "Refactor selected code"
-    prompt: "Please refactor this code to improve readability and performance"
-```
-
-</details>
-
-<details>
-<summary><strong>Model</strong></summary>
-
-Specify the default AI model to use for all agents in the workflow.
-
-```yaml
-# omega.yaml
-model: "claude-3.7-sonnet"
-```
-
-</details>
-
-<details>
-<summary><strong>Max Walker Depth</strong></summary>
-
-Control how deeply Omega traverses your project directory structure when gathering context.
-
-```yaml
-# omega.yaml
-max_walker_depth: 3 # Limit directory traversal to 3 levels deep
-```
-
-</details>
-
-<details>
-<summary><strong>Temperature</strong></summary>
-
-Adjust the creativity and randomness in AI responses. Lower values (0.0-0.3) produce more focused, deterministic outputs, while higher values (0.7-2.0) generate more diverse and creative results.
-
-```yaml
-# omega.yaml
-temperature: 0.7 # Balanced creativity and focus
-```
-
-</details>
-<details>
-<summary><strong>Tool Max Failure Limit</strong></summary>
-
-Control how many times a tool can fail before Omega forces completion to prevent infinite retry loops. This helps avoid situations where an agent gets stuck repeatedly trying the same failing operation.
-
-```yaml
-# omega.yaml
-max_tool_failure_per_turn: 3 # Allow up to 3 failures per tool before forcing completion
-```
-
-Set to a higher value if you want more retry attempts, or lower if you want faster failure detection.
-
-</details>
-
-<details>
-<summary><strong>Max Requests Per Turn</strong></summary>
-
-Limit the maximum number of requests an agent can make in a single conversation turn. This prevents runaway conversations and helps control API usage and costs.
-
-```yaml
-# omega.yaml
-max_requests_per_turn: 50 # Allow up to 50 requests per turn
-```
-
-When this limit is reached, Omega will:
-
-- Ask you if you wish to continue
-- If you respond with 'Yes', it will continue the conversation
-- If you respond with 'No', it will end the conversation
 
 </details>
 
 ---
 
-<details>
-<summary><strong>Model Context Protocol (MCP)</strong></summary>
+## Configuration
 
-The MCP feature allows AI agents to communicate with external tools and services. This implementation follows Anthropic's [Model Context Protocol](https://docs.anthropic.com/en/docs/claude-code/tutorials#set-up-model-context-protocol-mcp) design.
-
-### MCP Configuration
-
-Configure MCP servers using the CLI:
+### Provider credentials
 
 ```bash
-# List all MCP servers
-omega mcp list
-
-# Import a server from JSON
-omega mcp import
-
-# Show server configuration details
-omega mcp show
-
-# Remove a server
-omega mcp remove
-
-# Reload servers and rebuild caches
-omega mcp reload
+aimee provider login
+aimee provider logout
+aimee provider list
 ```
 
-Or manually create a `.mcp.json` file with the following structure:
+Credentials are stored under the config base path as `.credentials.json`. Do not put API keys in git.
 
-```json
-{
-  "mcpServers": {
-    "server_name": {
-      "command": "command_to_execute",
-      "args": ["arg1", "arg2"],
-      "env": { "ENV_VAR": "value" }
-    },
-    "another_server": {
-      "url": "http://localhost:3000/events"
-    }
-  }
-}
+There are **42** built-in provider IDs (`ProviderId::built_in_providers()` in `crates/aimee_domain/src/provider.rs`). `aimee provider list` is the source of truth.
+
+### `.aimee.toml`
+
+Primary config file: **`~/.aimee/.aimee.toml`**.
+
+Base-path resolution (`AIMEE_CONFIG` wins, then `OMEGA_CONFIG`):
+
+1. `AIMEE_CONFIG` if set
+2. `OMEGA_CONFIG` if set
+3. Existing `~/aimee`, `~/.aimee`, `~/omega`, or `~/.omega`
+4. Existing Forge-legacy `~/forge` or `~/.forge`
+5. Otherwise `~/.aimee`
+
+Defaults are embedded from `crates/aimee_config/.aimee.toml`. The JSON schema is `aimee.schema.json`.
+
+```toml
+# ~/.aimee/.aimee.toml  (illustrative — omit keys you do not need)
+max_tool_failure_per_turn = 3
+max_requests_per_turn = 100
+restricted = false
+tool_timeout_secs = 300
+services_url = "https://api.aimeecodes.dev/"
+
+[reasoning]
+enabled = true
+effort = "medium"
 ```
 
-MCP configurations are read from two locations (project-local takes precedence):
+`AIMEE_`-prefixed variables map onto `.aimee.toml` (`AIMEE_` prefix, `__` nested separator). Legacy `OMEGA_` variables are still read.
 
-1. **Project-local:** `.mcp.json` in your project directory
-2. **Global:** `~/omega/.mcp.json`
+| Variable | Role |
+|---|---|
+| `AIMEE_CONFIG` | Config base directory |
+| `AIMEE_SERVICES_URL` | Workspace / indexing API (default `https://api.aimeecodes.dev/`) |
+| `AIMEE_BIN` | Binary name used by the ZSH plugin (default `aimee`) |
+| `AIMEE_LOG` | `tracing` filter (e.g. `aimee=info`) |
+| `AIMEE_EDITOR` | Editor for `:edit` / `:config-edit` |
 
-### Example Use Cases
+### Skills, agents, and project policy
 
-MCP can be used for various integrations:
+**`AGENTS.md`** in the project root (or `~/.aimee/AGENTS.md`) is standing policy for every agent.
 
-- Web browser automation
-- External API interactions
-- Tool integration
-- Custom service connections
+| Source | Path |
+|---|---|
+| Project skills | `.aimee/skills/<name>/SKILL.md` |
+| Global skills | `<config-base>/skills/<name>/SKILL.md` |
+| Project commands | `.aimee/commands/` |
+| Project agents | `.aimee/agents/` |
 
-### Usage in Multi-Agent Workflows
-
-MCP tools can be used as part of multi-agent workflows, allowing specialized agents to interact with external systems as part of a collaborative problem-solving approach.
-
-</details>
+Project-local `.mcp.json` takes precedence over `~/.aimee/.mcp.json`.
 
 ---
 
 ## WEB3 + PWA
 
-Omega Loops is becoming WEB3-native and installable beyond the terminal.
+- **CLI + TUI today.** `aimee` is the branded command. `:aimee` / `:muse` / `:sage` switch agents. Config is `~/.aimee`.
+- **PWA.** `pwa/` is an installable app shell (theme `#ff5a7a`, service worker, agent chips). Drafts stay on-device until the agent API is wired.
 
-- **CLI + TUI today:** `omega` is the branded command. Slash and colon commands such as `:omega`, `:muse`, and `:sage` switch agents. Config lives in `~/.omega` (Forge Code `~/forge` / `~/.forge` directories are still read if present).
-- **PWA next:** a progressive web app will expose the same agent loop in a browser and as an installable mobile/desktop app, so you can pick up a conversation on the go.
-- **WEB3-native:** wallet login, signed agent actions, and on-chain workflow hooks will sit alongside existing provider auth — payments and spend stay HITL.
+  ```bash
+  cd pwa && python3 -m http.server 4173
+  ```
 
-The terminal remains the source of truth while the PWA is built on the same `omega_*` crates.
-
----
-
-## Documentation
-
-For comprehensive documentation on all features and capabilities, please visit the [documentation site](https://github.com/omegaloops/omegaloops/tree/main/docs).
+- **Anda / KIP.** Optional hash-chained conversation checkpoints (`aimee conversation pathway`). Enable `[anda]` in `.aimee.toml`. `aimee_anda_icp` is the ICP durability backend.
+- **Wallet.** PWA wallet login sits beside provider auth. Payments and spend stay HITL.
 
 ---
 
-## Installation
+## Repository map
+
+Rust 2024 workspace (`crates/*`). TypeScript eval harness in `benchmarks/`.
+
+| Path | Role |
+|---|---|
+| `AIMEE.md` | Full application discovery (this tree) |
+| `crates/aimee_domain` | Domain types, errors, tool catalog, policies |
+| `crates/aimee_app` | Application orchestration, DTOs, tool registry |
+| `crates/aimee_services` | Application services (generic over infra) |
+| `crates/aimee_infra` | Infrastructure trait impls (fs, http, auth, mcp) |
+| `crates/aimee_repo` | Persistence (Diesel, SQLite, proto, agent defs) |
+| `crates/aimee_main` | CLI, TUI, zsh integration (`aimee` binary) |
+| `crates/aimee_config` | `.aimee.toml` schema and IO |
+| `crates/aimee_anda` / `aimee_anda_icp` | Eternal session pathways / ICP durability |
+| `crates/aimee_ci` | GitHub workflow generation |
+| `templates/` | Agent prompt templates |
+| `shell-plugin/` | ZSH plugin |
+| `pwa/` | Installable browser / mobile shell |
+| `assets/brand/` | Wordmark, flock mark |
+| `benchmarks/` | TypeScript eval harness (`tsx`, Node) |
+| `plans/` | Muse plans — historical unless cited |
+
+### Development
 
 ```bash
-# YOLO
-curl -fsSL https://omegaloops.dev/cli | sh
-
-# Package managers
-nix run github:omegaloops/omegaloops # for latest dev branch
+cargo fmt
+cargo check -p aimee_main
+cargo clippy -p aimee_main --all-targets -- -D warnings
+cargo insta test --accept -p aimee_main
 ```
 
----
+Nix: `nix run github:swcstudiospace/omegaloops` or `nix develop`. CI sets `RUSTFLAGS=-D warnings`. House rules for agents: `AGENTS.md`.
 
-## Community
-
-Join our vibrant Discord community to connect with other Omega users and contributors, get help with your projects, share ideas, and provide feedback!
-
-[![Discord](https://img.shields.io/discord/1044859667798568962?style=for-the-badge&cacheSeconds=120&logo=discord)](https://discord.gg/kRZBPpkgwq)
+Do not commit secrets, `.env` files, or `target/`.
 
 ---
 
-## Support Us
+## License
 
-Your support drives Omega's continued evolution! By starring our GitHub repository, you:
+Copyright 2026 Spectrum Web Co LLC (brand @swcstudio).
 
-- Help others discover this powerful tool 🔍
-- Motivate our development team 💪
-- Enable us to prioritize new features 🛠️
-- Strengthen our open-source community 🌱
+Aimee Codes is licensed under the [Apache License, Version 2.0](LICENSE) (`SPDX-License-Identifier: Apache-2.0`).
+
+The copyright holder is **Spectrum Web Co LLC**. Trademarks including Aimee Codes, Omega Loops, Spectrum Web Co, and @swcstudio remain with the company (Apache-2.0 §6).
+
+---
+
+## Spectrum Web Co LLC
+
+Aimee Codes is developed and maintained by **Spectrum Web Co LLC**. Formerly Omega Loops.
+
+| | |
+|---|---|
+| Legal name | Spectrum Web Co LLC |
+| Brand | [@swcstudio](https://github.com/swcstudio) |
+| Product | [Aimee Codes](https://github.com/swcstudiospace/omegaloops) — CLI agent flock |
+| Command | `aimee` |
+| GitHub | [swcstudiospace/omegaloops](https://github.com/swcstudiospace/omegaloops) |
+| Studio | [swcstudio.space](https://www.swcstudio.space/) |
+| Contact | [ovesheng@spectrumweb.co](mailto:ovesheng@spectrumweb.co) |
+
+```
+    ___    ____ __  _______ ______
+   /   |  /  _/  |/  / ____/ ____/
+  / /| |  / // /|_/ / __/ / __/
+ / ___ |_/ // /  / / /___/ /___
+/_/  |_/___/_/  /_/_____/_____/
+```

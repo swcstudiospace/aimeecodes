@@ -3,32 +3,32 @@
 # Editor and command suggestion action handlers
 
 # Action handler: Open external editor for command composition
-function _omega_action_editor() {
+function _aimee_action_editor() {
     local initial_text="$1"
     echo
     
-    # Determine editor in order of preference: OMEGA_EDITOR > EDITOR > nano
-    local editor_cmd="${OMEGA_EDITOR:-${EDITOR:-nano}}"
+    # Determine editor in order of preference: AIMEE_EDITOR > EDITOR > nano
+    local editor_cmd="${AIMEE_EDITOR:-${EDITOR:-nano}}"
     
     # Validate editor exists
     if ! command -v "${editor_cmd%% *}" &>/dev/null; then
-        _omega_log error "Editor not found: $editor_cmd (set OMEGA_EDITOR or EDITOR)"
+        _aimee_log error "Editor not found: $editor_cmd (set AIMEE_EDITOR or EDITOR)"
         return 1
     fi
     
-    # Create .omega directory if it doesn't exist
-    local omega_dir=".omega"
-    if [[ ! -d "$omega_dir" ]]; then
-        mkdir -p "$omega_dir" || {
-            _omega_log error "Failed to create .omega directory"
+    # Create .aimee directory if it doesn't exist
+    local aimee_dir=".aimee"
+    if [[ ! -d "$aimee_dir" ]]; then
+        mkdir -p "$aimee_dir" || {
+            _aimee_log error "Failed to create .aimee directory"
             return 1
         }
     fi
     
-    # Create temporary file with git-like naming: OMEGA_EDITMSG.md
-    local temp_file="${omega_dir}/OMEGA_EDITMSG.md"
+    # Create temporary file with git-like naming: AIMEE_EDITMSG.md
+    local temp_file="${aimee_dir}/AIMEE_EDITMSG.md"
     touch "$temp_file" || {
-        _omega_log error "Failed to create temporary file"
+        _aimee_log error "Failed to create temporary file"
         return 1
     }
     
@@ -45,8 +45,8 @@ function _omega_action_editor() {
     local editor_exit_code=$?
     
     if [ $editor_exit_code -ne 0 ]; then
-        _omega_log error "Editor exited with error code $editor_exit_code"
-        _omega_reset
+        _aimee_log error "Editor exited with error code $editor_exit_code"
+        _aimee_reset
         return 1
     fi
     
@@ -55,7 +55,7 @@ function _omega_action_editor() {
     content=$(cat "$temp_file" | tr -d '\r')
     
     if [ -z "$content" ]; then
-        _omega_log info "Editor closed with no content"
+        _aimee_log info "Editor closed with no content"
         BUFFER=""
         CURSOR=0
         zle reset-prompt
@@ -71,11 +71,11 @@ function _omega_action_editor() {
 
 # Action handler: Generate shell command from natural language
 # Usage: :? <description>
-function _omega_action_suggest() {
+function _aimee_action_suggest() {
     local description="$1"
     
     if [[ -z "$description" ]]; then
-        _omega_log error "Please provide a command description"
+        _aimee_log error "Please provide a command description"
         return 0
     fi
     
@@ -83,7 +83,7 @@ function _omega_action_suggest() {
 
     # Generate the command
     local generated_command
-    generated_command=$(FORCE_COLOR=true CLICOLOR_FORCE=1 _omega_exec suggest "$description")
+    generated_command=$(FORCE_COLOR=true CLICOLOR_FORCE=1 _aimee_exec suggest "$description")
 
     if [[ -n "$generated_command" ]]; then
         # Replace the buffer with the generated command
@@ -91,6 +91,6 @@ function _omega_action_suggest() {
         CURSOR=${#BUFFER}
         zle reset-prompt
     else
-        _omega_log error "Failed to generate command"
+        _aimee_log error "Failed to generate command"
     fi
 }

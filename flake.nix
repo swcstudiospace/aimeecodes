@@ -1,5 +1,5 @@
 {
-  description = "Omega Loops: WEB3-native AI coding agent for Claude, GPT, O Series, Grok, Deepseek, Gemini and 300+ models";
+  description = "Aimee Codes: WEB3-native AI coding agent for Claude, GPT, O Series, Grok, Deepseek, Gemini and 300+ models";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -34,8 +34,8 @@
               && baseNameOf path != "target"
               && baseNameOf path != "result";
           };
-          omega = pkgs.rustPlatform.buildRustPackage {
-            pname = "omega";
+          aimee = pkgs.rustPlatform.buildRustPackage {
+            pname = "aimee";
             version = "0.1.0-dev";
             inherit src;
 
@@ -46,15 +46,15 @@
 
             cargoBuildFlags = [
               "-p"
-              "omega_main"
+              "aimee_main"
               "--bin"
-              "omega"
+              "aimee"
             ];
             cargoInstallFlags = [
               "-p"
-              "omega_main"
+              "aimee_main"
               "--bin"
-              "omega"
+              "aimee"
             ];
 
             nativeBuildInputs = [
@@ -87,28 +87,28 @@
             doCheck = false;
 
             meta = {
-              description = "Omega Loops: WEB3-native AI coding agent for Claude, GPT, O Series, Grok, Deepseek, Gemini and 300+ models";
-              homepage = "https://omegaloops.dev";
-              license = lib.licenses.mit;
-              mainProgram = "omega";
+              description = "Aimee Codes: WEB3-native AI coding agent for Claude, GPT, O Series, Grok, Deepseek, Gemini and 300+ models";
+              homepage = "https://github.com/swcstudiospace/omegaloops";
+              license = lib.licenses.asl20;
+              mainProgram = "aimee";
               platforms = lib.platforms.unix;
             };
           };
         in
         {
-          default = omega;
-          omega = omega;
+          default = aimee;
+          aimee = aimee;
         }
       );
 
       apps = forAllSystems (system: {
         default = {
           type = "app";
-          program = "${self.packages.${system}.default}/bin/omega";
+          program = "${self.packages.${system}.default}/bin/aimee";
         };
-        omega = {
+        aimee = {
           type = "app";
-          program = "${self.packages.${system}.omega}/bin/omega";
+          program = "${self.packages.${system}.aimee}/bin/aimee";
         };
       });
 

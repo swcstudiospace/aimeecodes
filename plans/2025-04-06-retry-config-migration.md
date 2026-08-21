@@ -6,7 +6,7 @@ The objective is to move the retry configuration from the `Workflow` struct to t
 ## Implementation Plan
 
 ### 1. Update the Environment struct
-Modify the `Environment` struct in `crates/omega_domain/src/env.rs` to include a `RetryConfig` field.
+Modify the `Environment` struct in `crates/aimee_domain/src/env.rs` to include a `RetryConfig` field.
 
 ```rust
 #[derive(Debug, Setters, Clone, Serialize, Deserialize)]
@@ -21,20 +21,20 @@ pub struct Environment {
 ```
 
 ### 2. Add Environment Variable Support for Retry Configuration
-Enhance `OmegaEnvironmentService` in `crates/omega_infra/src/env.rs` to read retry configuration from environment variables:
+Enhance `AimeeEnvironmentService` in `crates/aimee_infra/src/env.rs` to read retry configuration from environment variables:
 
-- `OMEGA_RETRY_INITIAL_BACKOFF_MS` - Initial backoff delay in milliseconds
-- `OMEGA_RETRY_BACKOFF_FACTOR` - Multiplication factor for each retry attempt
-- `OMEGA_RETRY_MAX_ATTEMPTS` - Maximum number of retry attempts
-- `OMEGA_RETRY_STATUS_CODES` - Comma-separated list of HTTP status codes that should trigger retries
+- `AIMEE_RETRY_INITIAL_BACKOFF_MS` - Initial backoff delay in milliseconds
+- `AIMEE_RETRY_BACKOFF_FACTOR` - Multiplication factor for each retry attempt
+- `AIMEE_RETRY_MAX_ATTEMPTS` - Maximum number of retry attempts
+- `AIMEE_RETRY_STATUS_CODES` - Comma-separated list of HTTP status codes that should trigger retries
 
 The service should read these variables and use them to configure the `RetryConfig` instance, falling back to default values if the environment variables are not set.
 
 ### 3. Remove RetryConfig from Workflow struct
-Remove the `retry` field from the `Workflow` struct in `crates/omega_domain/src/workflow.rs`.
+Remove the `retry` field from the `Workflow` struct in `crates/aimee_domain/src/workflow.rs`.
 
-### 4. Update OmegaProviderService
-Modify the `OmegaProviderService::new` method in `crates/omega_services/src/provider.rs` to obtain the retry configuration from the environment rather than from the workflow:
+### 4. Update AimeeProviderService
+Modify the `AimeeProviderService::new` method in `crates/aimee_services/src/provider.rs` to obtain the retry configuration from the environment rather than from the workflow:
 
 ```rust
 pub fn new<F: Infrastructure>(infra: Arc<F>) -> Self {
@@ -49,10 +49,10 @@ pub fn new<F: Infrastructure>(infra: Arc<F>) -> Self {
 ```
 
 ### 5. Update WorkflowRepository trait
-Update the `WorkflowRepository` trait in `crates/omega_services/src/infra.rs` to remove any references to retry configuration.
+Update the `WorkflowRepository` trait in `crates/aimee_services/src/infra.rs` to remove any references to retry configuration.
 
-### 6. Update OmegaWorkflowRepository implementation
-Modify the `OmegaWorkflowRepository` implementation in `crates/omega_infra/src/workflow.rs` to reflect the changes in the `Workflow` struct.
+### 6. Update AimeeWorkflowRepository implementation
+Modify the `AimeeWorkflowRepository` implementation in `crates/aimee_infra/src/workflow.rs` to reflect the changes in the `Workflow` struct.
 
 ### 7. Update tests
 Update any tests that rely on the `retry` field in the `Workflow` struct to use the new field in `Environment` instead.

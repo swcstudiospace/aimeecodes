@@ -12,7 +12,7 @@ Add a required `ToolCallContext` parameter to the `ExecutableTool` trait's `call
    Complexity: Low
    Dependencies: None
 
-   Create a new struct in `omega_domain` (likely in a new file `tool_call_context.rs`) to represent the context passed to tool calls. Initially, this will be an empty struct with the infrastructure in place for future extension.
+   Create a new struct in `aimee_domain` (likely in a new file `tool_call_context.rs`) to represent the context passed to tool calls. Initially, this will be an empty struct with the infrastructure in place for future extension.
 2. Create a helper function for test contexts
    Priority: High
    Complexity: Low
@@ -24,8 +24,8 @@ Add a required `ToolCallContext` parameter to the `ExecutableTool` trait's `call
    Complexity: Low
    Dependencies: Step 1
 
-   Modify the trait definition in `crates/omega_domain/src/tool_definition.rs` to add the `ToolCallContext` parameter to the `call` method.
-4. Modify the `JsonTool` adapter in `omega_domain/src/tool.rs`
+   Modify the trait definition in `crates/aimee_domain/src/tool_definition.rs` to add the `ToolCallContext` parameter to the `call` method.
+4. Modify the `JsonTool` adapter in `aimee_domain/src/tool.rs`
    Priority: High
    Complexity: Low
    Dependencies: Step 3
@@ -36,18 +36,18 @@ Add a required `ToolCallContext` parameter to the `ExecutableTool` trait's `call
    Complexity: Medium
    Dependencies: Step 3
 
-   Update `crates/omega_services/src/tool_service.rs` to create and pass a `ToolCallContext` when calling tools.
+   Update `crates/aimee_services/src/tool_service.rs` to create and pass a `ToolCallContext` when calling tools.
 6. Update all tool implementations
    Priority: High
    Complexity: High
    Dependencies: Step 3
 
    Update all implementations of `ExecutableTool` across the codebase to accept the new `ToolCallContext` parameter:
-   * Shell tool (`crates/omega_services/src/tools/shell/shell_tool.rs`)
-   * Show user tool (`crates/omega_services/src/tools/show_user.rs`)
-   * File system tools (in `crates/omega_services/src/tools/fs/`)
-   * Patch tools (in `crates/omega_services/src/tools/patch/`)
-   * Fetch tool (`crates/omega_services/src/tools/fetch.rs`)
+   * Shell tool (`crates/aimee_services/src/tools/shell/shell_tool.rs`)
+   * Show user tool (`crates/aimee_services/src/tools/show_user.rs`)
+   * File system tools (in `crates/aimee_services/src/tools/fs/`)
+   * Patch tools (in `crates/aimee_services/src/tools/patch/`)
+   * Fetch tool (`crates/aimee_services/src/tools/fetch.rs`)
    * Other tools discovered during implementation
 7. Update test implementations with a systematic approach
    Priority: High

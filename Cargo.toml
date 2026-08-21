@@ -1,7 +1,5 @@
 [workspace]
 members = ["crates/*"]
-# Incomplete scaffold crates (no Cargo.toml yet) — keep out of the build graph.
-exclude = ["crates/omega_anda", "crates/omega_anda_icp"]
 resolver = "2"
 
 
@@ -9,6 +7,10 @@ resolver = "2"
 version = "0.1.0"
 rust-version = "1.94"
 edition = "2024"
+license = "Apache-2.0"
+authors = ["Spectrum Web Co LLC <ovesheng@spectrumweb.co>"]
+homepage = "https://www.swcstudio.space/"
+repository = "https://github.com/swcstudiospace/omegaloops"
 
 [profile.release]
 lto = true
@@ -141,29 +143,31 @@ gix = "0.86"
 google-cloud-auth = "1.8.0" # Google Cloud authentication with automatic token refresh
 
 # Internal crates
-omega_embed = { path = "crates/omega_embed" }
-omega_api = { path = "crates/omega_api" }
-omega_app = { path = "crates/omega_app" }
-omega_ci = { path = "crates/omega_ci" }
-omega_display = { path = "crates/omega_display" }
-omega_domain = { path = "crates/omega_domain" }
-omega_fs = { path = "crates/omega_fs" }
-omega_infra = { path = "crates/omega_infra" }
-omega_repo = { path = "crates/omega_repo" }
-omega_main = { path = "crates/omega_main" }
-omega_services = { path = "crates/omega_services" }
-omega_snaps = { path = "crates/omega_snaps" }
-omega_spinner = { path = "crates/omega_spinner" }
-omega_stream = { path = "crates/omega_stream" }
-omega_template = { path = "crates/omega_template" }
-omega_tool_macros = { path = "crates/omega_tool_macros" }
-omega_tracker = { path = "crates/omega_tracker" }
-omega_walker = { path = "crates/omega_walker" }
-omega_json_repair = { path = "crates/omega_json_repair" }
-omega_select = { path = "crates/omega_select" }
-omega_test_kit = { path = "crates/omega_test_kit" }
+aimee_embed = { path = "crates/aimee_embed" }
+aimee_api = { path = "crates/aimee_api" }
+aimee_app = { path = "crates/aimee_app" }
+aimee_ci = { path = "crates/aimee_ci" }
+aimee_display = { path = "crates/aimee_display" }
+aimee_domain = { path = "crates/aimee_domain" }
+aimee_fs = { path = "crates/aimee_fs" }
+aimee_infra = { path = "crates/aimee_infra" }
+aimee_repo = { path = "crates/aimee_repo" }
+aimee_main = { path = "crates/aimee_main" }
+aimee_services = { path = "crates/aimee_services" }
+aimee_snaps = { path = "crates/aimee_snaps" }
+aimee_spinner = { path = "crates/aimee_spinner" }
+aimee_stream = { path = "crates/aimee_stream" }
+aimee_template = { path = "crates/aimee_template" }
+aimee_tool_macros = { path = "crates/aimee_tool_macros" }
+aimee_tracker = { path = "crates/aimee_tracker" }
+aimee_walker = { path = "crates/aimee_walker" }
+aimee_json_repair = { path = "crates/aimee_json_repair" }
+aimee_select = { path = "crates/aimee_select" }
+aimee_test_kit = { path = "crates/aimee_test_kit" }
 
-omega_markdown_stream = { path = "crates/omega_markdown_stream" }
-omega_config = { path = "crates/omega_config" }
-omega_eventsource = { path = "crates/omega_eventsource" }
-omega_eventsource_stream = { path = "crates/omega_eventsource_stream" }
+aimee_markdown_stream = { path = "crates/aimee_markdown_stream" }
+aimee_config = { path = "crates/aimee_config" }
+aimee_eventsource = { path = "crates/aimee_eventsource" }
+aimee_eventsource_stream = { path = "crates/aimee_eventsource_stream" }
+aimee_anda = { path = "crates/aimee_anda" }
+aimee_anda_icp = { path = "crates/aimee_anda_icp" }

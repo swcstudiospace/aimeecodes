@@ -1,10 +1,10 @@
 # Fix Auto-Sync Workspace Registration Issue
 
-**Issue:** [#2288](https://github.com/omegaloops/omegaloops/issues/2288)
+**Issue:** [#2288](https://github.com/swcstudiospace/omegaloops/issues/2288)
 
-**Problem:** The zsh plugin automatically syncs workspaces in the background on every directory change, causing unintended parent directories to be registered as workspaces. When users run `omega workspace list`, ancestor directories appear as "Current" instead of the actual working directory.
+**Problem:** The zsh plugin automatically syncs workspaces in the background on every directory change, causing unintended parent directories to be registered as workspaces. When users run `aimee workspace list`, ancestor directories appear as "Current" instead of the actual working directory.
 
-**Root Cause:** `_omega_start_background_sync()` in `shell-plugin/lib/helpers.zsh:114-131` unconditionally runs `omega workspace sync` without checking if the workspace or its ancestors are already registered.
+**Root Cause:** `_aimee_start_background_sync()` in `shell-plugin/lib/helpers.zsh:114-131` unconditionally runs `aimee workspace sync` without checking if the workspace or its ancestors are already registered.
 
 ---
 
@@ -18,30 +18,30 @@ Prevent auto-sync from creating unintended workspace registrations while maintai
 
 ### Phase 1: Add Workspace Detection Command
 
-- [ ] Add new CLI subcommand `omega workspace is-indexed [PATH]` that checks if a path (or any ancestor) is already registered as a workspace
-- [ ] Implement in `crates/omega_main/src/cli.rs` - add `IsIndexed` variant to `WorkspaceCommand` enum
-- [ ] Add handler in `crates/omega_main/src/ui.rs` that calls existing `is_indexed()` service method
+- [ ] Add new CLI subcommand `aimee workspace is-indexed [PATH]` that checks if a path (or any ancestor) is already registered as a workspace
+- [ ] Implement in `crates/aimee_main/src/cli.rs` - add `IsIndexed` variant to `WorkspaceCommand` enum
+- [ ] Add handler in `crates/aimee_main/src/ui.rs` that calls existing `is_indexed()` service method
 - [ ] The command should return exit code 0 if indexed, exit code 1 if not indexed
 - [ ] Output should be silent by default (only exit code matters for scripting)
 - [ ] Add optional `--verbose` flag to show which workspace was found (exact or ancestor)
 
 ### Phase 2: Update Zsh Background Sync Logic
 
-- [ ] Modify `_omega_start_background_sync()` in `shell-plugin/lib/helpers.zsh:114-131`
-- [ ] Before running sync, call `$_OMEGA_BIN workspace is-indexed "$workspace_path"`
+- [ ] Modify `_aimee_start_background_sync()` in `shell-plugin/lib/helpers.zsh:114-131`
+- [ ] Before running sync, call `$_AIMEE_BIN workspace is-indexed "$workspace_path"`
 - [ ] Check exit code: if non-zero (not indexed), skip the sync and return early
 - [ ] Only proceed with background sync if exit code is 0 (workspace or ancestor is already indexed)
-- [ ] Add debug logging (when `OMEGA_DEBUG=true`) to indicate when sync is skipped
+- [ ] Add debug logging (when `AIMEE_DEBUG=true`) to indicate when sync is skipped
 
 ### Phase 3: Handle Initial Workspace Registration
 
-- [ ] Ensure manual `omega workspace sync` still works for first-time registration
+- [ ] Ensure manual `aimee workspace sync` still works for first-time registration
 - [ ] Update documentation to clarify the auto-sync behavior (only syncs already-registered workspaces)
-- [ ] Consider adding a helper message when users first cd into a new directory that suggests running `omega workspace sync` to enable auto-sync
+- [ ] Consider adding a helper message when users first cd into a new directory that suggests running `aimee workspace sync` to enable auto-sync
 
 ### Phase 4: Update Workspace List Display
 
-- [ ] Enhance `on_list_workspaces()` in `crates/omega_main/src/ui.rs:3266-3311` to distinguish between exact match and ancestor match
+- [ ] Enhance `on_list_workspaces()` in `crates/aimee_main/src/ui.rs:3266-3311` to distinguish between exact match and ancestor match
 - [ ] When current workspace is an ancestor match, display as `[Current via ancestor]` or similar
 - [ ] Show the actual current directory path in the output when it differs from the workspace path
 
@@ -51,26 +51,26 @@ Prevent auto-sync from creating unintended workspace registrations while maintai
 
 ### Before Fix
 - [ ] Run `cd /Users/username` (parent directory)
-- [ ] Run `omega workspace sync` once
-- [ ] Run `cd /Users/username/Documents/Projects/omega` (subdirectory)
+- [ ] Run `aimee workspace sync` once
+- [ ] Run `cd /Users/username/Documents/Projects/aimee` (subdirectory)
 - [ ] Trigger zsh accept-line (press Enter on any command)
-- [ ] Run `omega workspace list`
-- [ ] Verify: `/Users/username/Documents/Projects/omega` is incorrectly registered as a workspace
+- [ ] Run `aimee workspace list`
+- [ ] Verify: `/Users/username/Documents/Projects/aimee` is incorrectly registered as a workspace
 
 ### After Fix
 - [ ] Clean database and repeat above steps
-- [ ] Run `cd /Users/username/Documents/Projects/omega`
+- [ ] Run `cd /Users/username/Documents/Projects/aimee`
 - [ ] Trigger zsh accept-line (press Enter)
-- [ ] Run `omega workspace list`
+- [ ] Run `aimee workspace list`
 - [ ] Verify: Only `/Users/username` appears (no auto-sync of subdirectory)
 - [ ] Verify: List shows `[Current via ancestor]` or similar indication
-- [ ] Run explicit `omega workspace sync` in subdirectory
+- [ ] Run explicit `aimee workspace sync` in subdirectory
 - [ ] Verify: Now subdirectory is registered and will auto-sync on future visits
 
 ### Edge Cases
 - [ ] Test behavior when no workspace exists at all (should not auto-sync)
 - [ ] Test behavior in deeply nested directories (should find closest ancestor)
-- [ ] Test behavior when `OMEGA_SYNC_ENABLED=false` (should still respect flag)
+- [ ] Test behavior when `AIMEE_SYNC_ENABLED=false` (should still respect flag)
 - [ ] Test manual sync in new directory (should still work)
 
 ---
@@ -78,7 +78,7 @@ Prevent auto-sync from creating unintended workspace registrations while maintai
 ## Potential Risks and Mitigations
 
 ### Risk 1: Breaking Existing User Workflows
-**Mitigation:** Users who rely on automatic workspace creation will need to run `omega workspace sync` once per workspace. This is a one-time migration cost for better UX long-term.
+**Mitigation:** Users who rely on automatic workspace creation will need to run `aimee workspace sync` once per workspace. This is a one-time migration cost for better UX long-term.
 
 ### Risk 2: Performance Impact
 **Mitigation:** The `workspace is-indexed` check is a fast database query (already exists in `is_indexed()` method). It should add negligible overhead.
@@ -114,7 +114,7 @@ Only auto-sync directories within N levels of an existing workspace.
 
 - No external dependencies
 - Existing `is_indexed()` method in `WorkspaceService` can be reused
-- Zsh plugin already has access to `$_OMEGA_BIN` for CLI calls
+- Zsh plugin already has access to `$_AIMEE_BIN` for CLI calls
 
 ---
 
@@ -131,5 +131,5 @@ Only auto-sync directories within N levels of an existing workspace.
 
 - [ ] Update `shell-plugin/README.md` to explain auto-sync behavior
 - [ ] Add note about one-time `workspace sync` requirement for new workspaces
-- [ ] Document `OMEGA_SYNC_ENABLED` environment variable
+- [ ] Document `AIMEE_SYNC_ENABLED` environment variable
 - [ ] Update workspace command documentation with new `is-indexed` subcommand

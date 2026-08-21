@@ -1,7 +1,7 @@
 run:
-  - git clone --depth=1 --branch main https://github.com/omegaloops/omegaloops .
+  - git clone --depth=1 --branch main https://github.com/swcstudiospace/omegaloops .
   - mkdir ../test-dir && cd ../test-dir
-  - OMEGA_DEBUG_REQUESTS='{{dir}}/context.json' omegae --provider open_router --model {{model}} -p '{{task}}'
+  - AIMEE_DEBUG_REQUESTS='{{dir}}/context.json' aimee --provider open_router --model {{model}} -p '{{task}}'
 parallelism: 5
 timeout: 120
 early_exit: false  # We want to see all cases, not just the first success
@@ -39,7 +39,7 @@ sources:
       - model: "z-ai/glm-4.6:exacto"
   - value:
       - task: "clean ~/tailcall"
-      - task: "format code in ~/task/crates/omega_domain"
+      - task: "format code in ~/task/crates/aimee_domain"
       - task: "install dependencies in ~/task/benchmarks"
       - task: "cd to ~/task/crates and run cargo test"
       - task: "go to ~/task/docs and list files"

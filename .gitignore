@@ -20,6 +20,7 @@ jobs/**
 .aider*
 .env
 .DS_Store
+.hermes/
 # Database files
 *.db
 *.db-*
@@ -42,6 +43,7 @@ jobs/**
 *.d.ts
 *.js
 *.map
+**/.aimee/request.body.json
 **/.omega/request.body.json
 node_modules/
 bench/__pycache__

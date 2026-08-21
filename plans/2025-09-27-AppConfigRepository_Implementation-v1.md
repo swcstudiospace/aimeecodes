@@ -8,54 +8,54 @@ Create a new AppConfigRepository following the established repository pattern in
 
 ### Phase 1: Repository Pattern Implementation
 
-- [x] **Create AppConfigRepository trait in omega_services/src/infra.rs**
+- [x] **Create AppConfigRepository trait in aimee_services/src/infra.rs**
   - Define async methods for CRUD operations on AppConfig
   - Follow the same pattern as ConversationRepository
   - Include methods: get_app_config() -> Option<AppConfig>, set_app_config(config: &AppConfig) -> anyhow::Result<()>
 
-- [x] **Create AppConfigRepositoryImpl in omega_infra crate**
-  - Create new file: crates/omega_infra/src/database/repository/app_config.rs
+- [x] **Create AppConfigRepositoryImpl in aimee_infra crate**
+  - Create new file: crates/aimee_infra/src/database/repository/app_config.rs
   - Implement the AppConfigRepository trait
-  - Handle file-based storage operations similar to current OmegaConfigService
+  - Handle file-based storage operations similar to current AimeeConfigService
   - Include comprehensive tests following the project's testing patterns
 
-- [x] **Update omega_infra/src/database/mod.rs**
+- [x] **Update aimee_infra/src/database/mod.rs**
   - Add module declaration for app_config repository
   - Export the new AppConfigRepositoryImpl
 
-- [x] **Update OmegaInfra struct**
-  - Add app_config_repository field to OmegaInfra in crates/omega_infra/src/omega_infra.rs
+- [x] **Update AimeeInfra struct**
+  - Add app_config_repository field to AimeeInfra in crates/aimee_infra/src/aimee_infra.rs
   - Initialize the repository in the constructor
-  - Implement AppConfigRepository trait for OmegaInfra by delegating to the repository
+  - Implement AppConfigRepository trait for AimeeInfra by delegating to the repository
 
 ### Phase 2: Service Layer Updates
 
-- [x] **Update OmegaConfigService implementation**
-  - Modify crates/omega_services/src/app_config.rs to use AppConfigRepository instead of direct file operations
+- [x] **Update AimeeConfigService implementation**
+  - Modify crates/aimee_services/src/app_config.rs to use AppConfigRepository instead of direct file operations
   - Replace direct file read/write with repository method calls
   - Maintain the same AppConfigService interface for backward compatibility
 
 - [x] **Update Services trait integration**
-  - Add AppConfigRepository associated type to the Services trait in crates/omega_app/src/services.rs
+  - Add AppConfigRepository associated type to the Services trait in crates/aimee_app/src/services.rs
   - Add app_config_repository() method to Services trait
-  - Update the trait implementation in omega_services to return the repository
+  - Update the trait implementation in aimee_services to return the repository
 
 ### Phase 3: Direct Usage Migration
 
 - [x] **Update Authenticator class**
-  - Modify crates/omega_app/src/authenticator.rs to use AppConfigRepository through the services layer
+  - Modify crates/aimee_app/src/authenticator.rs to use AppConfigRepository through the services layer
   - Replace direct AppConfigService calls with repository-based operations
 
-- [x] **Update omega_api implementations**
-  - Modify crates/omega_api/src/omega_api.rs and crates/omega_api/src/api.rs
+- [x] **Update aimee_api implementations**
+  - Modify crates/aimee_api/src/aimee_api.rs and crates/aimee_api/src/api.rs
   - Ensure API layer uses the updated service layer with repository pattern
 
 - [x] **Update UI components**
-  - Modify crates/omega_main/src/ui.rs to use the updated service layer
+  - Modify crates/aimee_main/src/ui.rs to use the updated service layer
   - Ensure no direct AppConfig instantiation remains
 
 - [x] **Update authentication service**
-  - Modify crates/omega_services/src/auth.rs to use repository pattern
+  - Modify crates/aimee_services/src/auth.rs to use repository pattern
   - Ensure LoginInfo and InitAuth operations work with the new pattern
 
 ### Phase 4: Testing and Verification
@@ -76,7 +76,7 @@ Create a new AppConfigRepository following the established repository pattern in
 ### Phase 5: Documentation and Cleanup
 
 - [x] **Remove deprecated direct usage**
-  - Remove any remaining direct file operations in OmegaConfigService
+  - Remove any remaining direct file operations in AimeeConfigService
   - Ensure all AppConfig operations go through the repository
 
 - [x] **Add documentation**
@@ -102,7 +102,7 @@ Create a new AppConfigRepository following the established repository pattern in
    Mitigation: Maintain the AppConfigService interface and gradually migrate internal implementations while preserving public APIs
 
 2. **File System Access Complexity**
-   Mitigation: Reuse existing file infrastructure patterns from OmegaConfigService and follow the same error handling approach
+   Mitigation: Reuse existing file infrastructure patterns from AimeeConfigService and follow the same error handling approach
 
 3. **Testing Integration Points**
    Mitigation: Create mock implementations for testing and follow the established testing patterns used for ConversationRepository

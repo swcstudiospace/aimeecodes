@@ -1,7 +1,7 @@
 run:
-  - git clone --depth=1 --branch main https://github.com/omegaloops/omegaloops
+  - git clone --depth=1 --branch main https://github.com/swcstudiospace/omegaloops
   - ls -la
-  - echo "Omega deployment: $(readlink $(which omegae))"
+  - echo "Aimee deployment: $(readlink $(which aimee))"
   - echo '{{message}}'
 parallelism: 5
 timeout: 10

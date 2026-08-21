@@ -2,7 +2,7 @@
 
 ## Objective
 
-Modify the context compaction logic in `crates/omega_domain/src/compaction.rs` to identify and compress only continuous sequences of assistant messages, rather than compressing the entire context. This will provide more targeted and effective context compression while preserving the structure of conversations.
+Modify the context compaction logic in `crates/aimee_domain/src/compaction.rs` to identify and compress only continuous sequences of assistant messages, rather than compressing the entire context. This will provide more targeted and effective context compression while preserving the structure of conversations.
 
 ## Current Implementation Analysis
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-# Syntax highlighting configuration for omega commands
+# Syntax highlighting configuration for aimee commands
 # Style the conversation pattern with appropriate highlighting
 # Keywords in yellow, rest in default white
 

@@ -112,7 +112,7 @@ async function main() {
   await fs.mkdir(debugDir, { recursive: true });
 
   // Create a temp directory for setup commands
-  const setupTmpDir = await createTempDir("omega-setup-");
+  const setupTmpDir = await createTempDir("aimee-setup-");
 
   // Execute before_run commands
   if (task.before_run && task.before_run.length > 0) {
@@ -181,7 +181,7 @@ async function main() {
   const taskPromises = data.map((row, i) => {
     return limit(async () => {
       // Create a unique temp directory for this task
-      const taskTmpDir = await createTempDir(`omega-task-${i + 1}-`);
+      const taskTmpDir = await createTempDir(`aimee-task-${i + 1}-`);
 
       // Create a 'task' subdirectory for running commands
       const taskWorkDir = path.join(taskTmpDir.name, 'task');

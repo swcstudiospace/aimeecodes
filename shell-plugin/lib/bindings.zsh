@@ -1,25 +1,25 @@
 #!/usr/bin/env zsh
 
-# Key bindings and widget registration for omega plugin
+# Key bindings and widget registration for aimee plugin
 
 # Register ZLE widgets
-zle -N omega-accept-line
-zle -N omega-completion
+zle -N aimee-accept-line
+zle -N aimee-completion
 
 # Custom bracketed-paste handler that wraps dropped file paths in @[] syntax
 # and fixes syntax highlighting after paste.
 #
-# Path detection and wrapping is delegated to `omega zsh format` (Rust) so
+# Path detection and wrapping is delegated to `aimee zsh format` (Rust) so
 # that all parsing logic lives in one well-tested place.
-function omega-bracketed-paste() {
+function aimee-bracketed-paste() {
     # Call the built-in bracketed-paste widget first
     zle .$WIDGET "$@"
     
-    # Only auto-wrap when the line is a omega command (starts with ':').
+    # Only auto-wrap when the line is a aimee command (starts with ':').
     # This avoids mangling paths pasted into normal shell commands like
     # 'vim /some/path' or 'cat /some/path'.
     if [[ "$BUFFER" == :* ]]; then
-        local formatted=$("$_OMEGA_BIN" zsh format --buffer "$BUFFER")
+        local formatted=$("$_AIMEE_BIN" zsh format --buffer "$BUFFER")
         if [[ -n "$formatted" && "$formatted" != "$BUFFER" ]]; then
             BUFFER="$formatted"
             CURSOR=${#BUFFER}
@@ -37,15 +37,15 @@ function omega-bracketed-paste() {
 
 # Re-applied after zsh-vi-mode's `zvm_init` precmd hook, which rebuilds the
 # main/viins/vicmd keymaps and otherwise silently clobbers these bindings.
-function _omega_apply_keybindings() {
-    zle -N bracketed-paste omega-bracketed-paste
-    bindkey '^M' omega-accept-line
-    bindkey '^J' omega-accept-line
-    bindkey '^I' omega-completion
+function _aimee_apply_keybindings() {
+    zle -N bracketed-paste aimee-bracketed-paste
+    bindkey '^M' aimee-accept-line
+    bindkey '^J' aimee-accept-line
+    bindkey '^I' aimee-completion
 }
 
-_omega_apply_keybindings
+_aimee_apply_keybindings
 
 # Harmless no-op when zsh-vi-mode (jeffreytse/zsh-vi-mode) isn't loaded.
 typeset -ga zvm_after_init_commands
-zvm_after_init_commands+=('_omega_apply_keybindings')
+zvm_after_init_commands+=('_aimee_apply_keybindings')

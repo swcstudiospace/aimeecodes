@@ -1,5 +1,5 @@
 # No before_run needed - binary should be pre-built
-run: OMEGA_DEBUG_REQUESTS='{{dir}}/context.json' omegae -p '{{skill}}'
+run: AIMEE_DEBUG_REQUESTS='{{dir}}/context.json' aimee -p '{{skill}}'
 parallelism: 10
 timeout: 60
 early_exit: true

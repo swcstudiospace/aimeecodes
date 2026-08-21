@@ -11,19 +11,19 @@ set -euo pipefail
 
 PROVIDER="${1:-github_copilot}"
 MODEL="${2:-gpt-5.5}"
-BINARY="target/debug/omega"
+BINARY="target/debug/aimee"
 
 echo "Building debug binary..."
-cargo build -p omega_main 2>&1 | tail -3
+cargo build -p aimee_main 2>&1 | tail -3
 
 echo ""
-echo "Running: OMEGA_SESSION__PROVIDER_ID=$PROVIDER OMEGA_SESSION__MODEL_ID=$MODEL $BINARY -p 'Hi'"
+echo "Running: AIMEE_SESSION__PROVIDER_ID=$PROVIDER AIMEE_SESSION__MODEL_ID=$MODEL $BINARY -p 'Hi'"
 echo "---"
 
-# Capture stderr (where omega writes errors) and stdout separately.
+# Capture stderr (where aimee writes errors) and stdout separately.
 ERROR_OUTPUT=$(
-  OMEGA_SESSION__PROVIDER_ID="$PROVIDER" \
-  OMEGA_SESSION__MODEL_ID="$MODEL" \
+  AIMEE_SESSION__PROVIDER_ID="$PROVIDER" \
+  AIMEE_SESSION__MODEL_ID="$MODEL" \
   "$BINARY" -p "Hi" 2>&1 || true
 )
 

@@ -1,7 +1,7 @@
 # Evaluation for checking appropriate todo_write tool usage
 run:
-  - git clone --depth=1 --branch main https://github.com/omegaloops/omegaloops .
-  - OMEGA_OVERRIDE_PROVIDER=open_router OMEGA_OVERRIDE_MODEL={{model}} OMEGA_DEBUG_REQUESTS='{{dir}}/context.json' omegae -p '{{task}}'
+  - git clone --depth=1 --branch main https://github.com/swcstudiospace/omegaloops .
+  - AIMEE_OVERRIDE_PROVIDER=open_router AIMEE_OVERRIDE_MODEL={{model}} AIMEE_DEBUG_REQUESTS='{{dir}}/context.json' aimee -p '{{task}}'
 parallelism: 3
 timeout: 240
 early_exit: true

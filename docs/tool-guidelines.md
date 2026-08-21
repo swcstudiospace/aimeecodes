@@ -27,7 +27,7 @@ While you can include examples of how to use a tool in its description or in the
 
 ### 4. Register All Tools in the Registry
 
-Every tool must be registered in the `crates/omega_services/src/tools/registry.rs` file to be available for use. The `ToolRegistry::tools()` method returns all available tools configured with the given infrastructure.
+Every tool must be registered in `crates/aimee_domain/src/tools/catalog.rs` (`ToolCatalog`) and routed through `crates/aimee_app/src/tool_registry.rs`. The `ToolRegistry` returns catalog tools, agent tools, and MCP tools configured with the given infrastructure.
 
 ## Example Comparison
 

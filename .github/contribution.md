@@ -1,4 +1,4 @@
-# Omega-Loops 🛠️
+# Aimee-Codes 🛠️
 
 A sophisticated AI-powered coding assistant platform built in Rust, designed to provide intelligent code generation, manipulation, and analysis capabilities through a modular and extensible architecture.
 
@@ -32,21 +32,21 @@ cargo run --release
 ## 🏗️ Project Structure
 
 ```
-omega-loops/
+aimee-codes/
 ├── crates/
-│   ├── omega_main/        # CLI and main application logic
-│   ├── omega_domain/      # Core domain models and interfaces
-│   ├── omega_services/      # HTTP API and database management
-│   ├── omega_tool/        # Tool implementations
-│   └── omega_walker/      # File system operations
+│   ├── aimee_main/        # CLI and main application logic
+│   ├── aimee_domain/      # Core domain models and interfaces
+│   ├── aimee_services/      # HTTP API and database management
+│   ├── aimee_tool/        # Tool implementations
+│   └── aimee_walker/      # File system operations
 ```
 
 ## 🛠️ Core Components
 
-- **Domain Layer** (`omega_domain`) - Core business logic and interfaces
-- **Tool Layer** (`omega_tool`) - Development tools implementation
-- **Server Layer** (`omega_services`) - API endpoints and persistence
-- **Main Application** (`omega_main`) - CLI and application coordination
+- **Domain Layer** (`aimee_domain`) - Core business logic and interfaces
+- **Tool Layer** (`aimee_tool`) - Development tools implementation
+- **Server Layer** (`aimee_services`) - API endpoints and persistence
+- **Main Application** (`aimee_main`) - CLI and application coordination
 
 ## 🔧 Configuration
 

@@ -2,14 +2,14 @@
 
 ## Objective
 
-Extend the `AgentLoaderService` to load agents from both the existing `{HOME}/omega/agents/` directory and an additional `CWD/.omega/agents/` directory, combining agents from both sources while maintaining the current architecture patterns and safety guarantees.
+Extend the `AgentLoaderService` to load agents from both the existing `{HOME}/aimee/agents/` directory and an additional `CWD/.aimee/agents/` directory, combining agents from both sources while maintaining the current architecture patterns and safety guarantees.
 
 ## Implementation Plan
 
 ### Phase 1: Domain Layer Extensions
 - [x] Task 1. **Add CWD agent path method to Environment**
-  - Add `agent_cwd_path()` method to the `Environment` struct in `crates/omega_domain/src/env.rs` 
-  - Method should return `PathBuf::from(".omega/agents")` to point to the current working directory
+  - Add `agent_cwd_path()` method to the `Environment` struct in `crates/aimee_domain/src/env.rs` 
+  - Method should return `PathBuf::from(".aimee/agents")` to point to the current working directory
   - Follow the same pattern as existing `agent_path()` method but use current directory as base
 
 - [x] Task 2. **Update EnvironmentInfra trait usage documentation**  
@@ -18,7 +18,7 @@ Extend the `AgentLoaderService` to load agents from both the existing `{HOME}/om
 
 ### Phase 2: Service Layer Implementation
 - [x] Task 3. **Extend AgentLoaderService init method**
-  - Modify `init()` method in `crates/omega_services/src/agent_loader.rs` to load from three sources instead of two
+  - Modify `init()` method in `crates/aimee_services/src/agent_loader.rs` to load from three sources instead of two
   - Keep existing built-in agents loading (`init_default()`)
   - Keep existing custom agents loading from global directory (`init_custom()`)  
   - Add new CWD agents loading (`init_cwd()`) method call
@@ -55,9 +55,9 @@ Extend the `AgentLoaderService` to load agents from both the existing `{HOME}/om
   - Add test cases for the new method in existing environment tests
 
 - [x] Task 9. **Add unit tests for CWD agent loading**
-  - Create test fixtures in `crates/omega_services/src/fixtures/` for CWD agent scenarios
+  - Create test fixtures in `crates/aimee_services/src/fixtures/` for CWD agent scenarios
   - Test successful CWD agent loading with valid markdown files
-  - Test graceful handling of missing CWD `.omega/agents/` directory
+  - Test graceful handling of missing CWD `.aimee/agents/` directory
   - Test agent conflict resolution between global and CWD directories
 
 - [x] Task 10. **Add integration tests**
@@ -79,9 +79,9 @@ Extend the `AgentLoaderService` to load agents from both the existing `{HOME}/om
 ## Verification Criteria
 
 - All existing built-in agents continue to load successfully from embedded sources
-- Global custom agents continue to load from `{HOME}/omega/agents/` directory  
-- CWD agents load from `.omega/agents/` directory when it exists
-- Missing `.omega/agents/` directory doesn't cause errors or prevent other agent loading
+- Global custom agents continue to load from `{HOME}/aimee/agents/` directory  
+- CWD agents load from `.aimee/agents/` directory when it exists
+- Missing `.aimee/agents/` directory doesn't cause errors or prevent other agent loading
 - Agent precedence follows documented order: Built-in > Global > CWD
 - Agents with duplicate IDs are resolved correctly with later sources taking precedence
 - All existing tests pass without modification
@@ -106,9 +106,9 @@ Extend the `AgentLoaderService` to load agents from both the existing `{HOME}/om
 
 ## Alternative Approaches
 
-1. **Configuration-driven approach**: Add agent directory paths to omega.yaml configuration file, allowing users to specify custom agent directories explicitly
+1. **Configuration-driven approach**: Add agent directory paths to aimee.yaml configuration file, allowing users to specify custom agent directories explicitly
 
-2. **Environment variable approach**: Support `OMEGA_AGENT_PATHS` environment variable for colon-separated list of agent directories
+2. **Environment variable approach**: Support `AIMEE_AGENT_PATHS` environment variable for colon-separated list of agent directories
 
 3. **Recursive directory scanning**: Modify existing agent loading to recursively scan subdirectories within agent paths
 

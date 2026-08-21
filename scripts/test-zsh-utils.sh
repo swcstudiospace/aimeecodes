@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-# Correctness and performance tests for `omega zsh format` which wraps bare
+# Correctness and performance tests for `aimee zsh format` which wraps bare
 # file paths in @[...] syntax.  All parsing logic now lives in Rust; these
 # tests exercise the CLI subcommand end-to-end.
 #
@@ -20,19 +20,19 @@ CYAN='\033[36m'
 PASS=0
 FAIL=0
 
-# Resolve the omega binary (prefer local debug build)
+# Resolve the aimee binary (prefer local debug build)
 SCRIPT_DIR="${0:A:h}"
-OMEGA_BIN="${OMEGA_BIN:-${SCRIPT_DIR}/../target/debug/omega}"
+AIMEE_BIN="${AIMEE_BIN:-${SCRIPT_DIR}/../target/debug/aimee}"
 
-if [[ ! -x "$OMEGA_BIN" ]]; then
-    echo "${RED}omega binary not found at ${OMEGA_BIN}${RESET}"
-    echo "Run: cargo build -p omega_main"
+if [[ ! -x "$AIMEE_BIN" ]]; then
+    echo "${RED}aimee binary not found at ${AIMEE_BIN}${RESET}"
+    echo "Run: cargo build -p aimee_main"
     exit 1
 fi
 
 # Wrapper that calls the Rust formatter
 function format() {
-    "$OMEGA_BIN" zsh format --buffer "$1"
+    "$AIMEE_BIN" zsh format --buffer "$1"
 }
 
 # Create temporary files for testing paths with spaces
@@ -62,7 +62,7 @@ function assert_eq() {
 # --- Correctness tests ------------------------------------------------------
 
 echo ""
-echo -e "${BOLD}Correctness Tests${RESET} ${DIM}— omega zsh format${RESET}"
+echo -e "${BOLD}Correctness Tests${RESET} ${DIM}— aimee zsh format${RESET}"
 echo ""
 
 # Basic wrapping
@@ -148,7 +148,7 @@ assert_eq "backslash-escaped nonexistent path untouched" \
 # --- Performance tests -------------------------------------------------------
 
 echo ""
-echo -e "${BOLD}Performance Tests${RESET} ${DIM}— omega zsh format${RESET}"
+echo -e "${BOLD}Performance Tests${RESET} ${DIM}— aimee zsh format${RESET}"
 echo ""
 
 ITERATIONS=20

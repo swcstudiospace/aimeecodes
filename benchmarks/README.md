@@ -1,22 +1,22 @@
-# Omega Loops Evaluations
+# Aimee Codes Evaluations
 
-A flexible evaluation framework for running automated tests and benchmarks against Omega Loops commands.
+A flexible evaluation framework for running automated tests and benchmarks against Aimee Codes commands.
 
 ## Quick Start
 
 ### Setup
 
-Before running evaluations, create a `omegae` symlink to the debug binary:
+Before running evaluations, create a `aimee` symlink to the debug binary:
 
 ```bash
 # Create symlink in your PATH (e.g., ~/bin or /usr/local/bin)
-ln -sf /path/to/omega-loops/target/debug/omega ~/omegae
+ln -sf /path/to/aimee-codes/target/debug/aimee ~/aimeee
 
 # Or if ~/bin is in your PATH
-ln -sf $(pwd)/target/debug/omega ~/bin/omegae
+ln -sf $(pwd)/target/debug/aimee ~/bin/aimeee
 ```
 
-**Why is this needed?** Tasks execute in temporary directories, so relative paths like `../../target/debug/omega` won't work. The `omegae` symlink provides a stable absolute path that works from any directory.
+**Why is this needed?** Tasks execute in temporary directories, so relative paths like `../../target/debug/aimee` won't work. The `aimee` symlink provides a stable absolute path that works from any directory.
 
 ### Running Evaluations
 
@@ -74,12 +74,12 @@ before_run:
 
 # Required: Command(s) to execute for each test case
 # Single command
-run: omegae -p '{{prompt}}'
+run: aimee -p '{{prompt}}'
 
 # Or multiple commands (executed sequentially)
 run:
   - echo "Step 1: {{task}}"
-  - omegae -p '{{prompt}}'
+  - aimee -p '{{prompt}}'
   - echo "Step 2: Complete"
 
 # Execution configuration
@@ -289,7 +289,7 @@ sources:
 
 1. **Use quotes in commands**: When passing CSV values with spaces, wrap them in quotes:
    ```yaml
-   command: omega -p '{{prompt}}'
+   command: aimee -p '{{prompt}}'
    ```
 
 2. **Build before running**: Use `before_run` to ensure binaries are up-to-date:

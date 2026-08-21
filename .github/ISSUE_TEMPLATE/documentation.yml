@@ -31,7 +31,7 @@ body:
     attributes:
       label: Documentation Location
       description: Where is the documentation issue? (URL, file path, or section name)
-      placeholder: https://github.com/omegaloops/omegaloops/blob/main/docs/...
+      placeholder: https://github.com/swcstudiospace/omegaloops/blob/main/docs/...
     validations:
       required: true
 
@@ -81,7 +81,7 @@ body:
       placeholder: |
         For example:
         ```yaml
-        # omega.yaml example
+        # aimee.yaml example
         model: claude-3.7-sonnet
         ```
 

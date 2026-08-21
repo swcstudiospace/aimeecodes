@@ -2,7 +2,7 @@
 
 # Custom completion widget that handles both :commands and @ completion
 
-function omega-completion() {
+function aimee-completion() {
     local current_word="${LBUFFER##* }"
     
     # Handle @ completion (files and directories)
@@ -11,7 +11,7 @@ function omega-completion() {
         local selected
         
         # Use Rust's built-in file picker
-        selected=$(_omega_select_with_query "$filter_text" file)
+        selected=$(_aimee_select_with_query "$filter_text" file)
         
         if [[ -n "$selected" ]]; then
             selected="@[${selected}]"
@@ -31,7 +31,7 @@ function omega-completion() {
         
         # Use Rust's built-in command picker
         local selected
-        selected=$(_omega_select_with_query "$filter_text" command)
+        selected=$(_aimee_select_with_query "$filter_text" command)
         
         if [[ -n "$selected" ]]; then
             # Replace the current buffer with the selected command

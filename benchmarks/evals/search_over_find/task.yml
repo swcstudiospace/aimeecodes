@@ -1,6 +1,6 @@
 run:
-  - git clone --depth=1 --branch main https://github.com/omegaloops/omegaloops .
-  - OMEGA_DEBUG_REQUESTS='{{dir}}/context.json' omegae --provider open_router --model {{model}} -p '{{task}}'
+  - git clone --depth=1 --branch main https://github.com/swcstudiospace/omegaloops .
+  - AIMEE_DEBUG_REQUESTS='{{dir}}/context.json' aimee --provider open_router --model {{model}} -p '{{task}}'
 parallelism: 10
 timeout: 180
 early_exit: true
