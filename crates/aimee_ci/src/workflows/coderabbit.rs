@@ -17,7 +17,7 @@ pub fn generate_coderabbit_workflow() {
         )
         .add_step(
             Step::new("Review and comment")
-                .run("coderabbit review --type committed --plain")
+                .run(coderabbit_review_command())
                 .add_env(("CODERABBIT_API_KEY", "${{ secrets.CODERABBIT_API_KEY }}")),
         );
 
@@ -43,4 +43,33 @@ pub fn generate_coderabbit_workflow() {
         .name("coderabbit.yml")
         .generate()
         .unwrap();
+}
+
+/// CodeRabbit CLI review invocation used by the generated workflow.
+///
+/// Current CLI rejects `--plain` (`error: unknown option '--plain'`).
+/// `--committed` is the boolean form of the old `--type committed` flag.
+fn coderabbit_review_command() -> &'static str {
+    "coderabbit review --committed"
+}
+
+#[cfg(test)]
+mod tests {
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn test_coderabbit_review_command_matches_current_cli() {
+        let fixture = super::coderabbit_review_command();
+        let actual = fixture;
+        let expected = "coderabbit review --committed";
+        assert_eq!(actual, expected);
+        assert!(
+            !actual.contains("--plain"),
+            "current CodeRabbit CLI rejects --plain"
+        );
+        assert!(
+            !actual.contains("--type"),
+            "current CodeRabbit CLI uses --committed, not --type committed"
+        );
+    }
 }

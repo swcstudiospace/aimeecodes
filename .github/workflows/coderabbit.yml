@@ -38,7 +38,7 @@ jobs:
     - name: Install CodeRabbit CLI
       run: curl -fsSL https://cli.coderabbit.ai/install.sh | sh
     - name: Review and comment
-      run: coderabbit review --type committed --plain
+      run: coderabbit review --committed
       env:
         CODERABBIT_API_KEY: ${{ secrets.CODERABBIT_API_KEY }}
 concurrency:
