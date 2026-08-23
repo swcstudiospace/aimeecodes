@@ -35,7 +35,7 @@ Description files contain placeholders like `{{tool_names.patch}}` or `{{env.cwd
 
 ## Registry routing
 
-`ToolRegistry` (`aimee_app`) routes three sources: this catalog, per-agent tools, and MCP server tools. MCP additions appear alongside these but are validated like any external input. See [Tools overview](../concepts/tools-overview.md).
+`ToolRegistry` (`aimee_app`) routes three sources: this catalog, per-agent tools, and MCP server tools. MCP additions appear alongside these but are validated like any external input. See [Tools overview](../../concepts/tools-overview.md).
 
 ## See also
 
