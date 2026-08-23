@@ -1,0 +1,13 @@
+# GitBook content configuration for the Aimee Codes documentation space.
+#
+# This directory is a self-contained GitBook space inside the aimeecodes
+# monorepo (see /docs.yaml at the repository root for the site mapping).
+#
+# Structure reference:
+# https://gitbook.com/docs/docs-as-code/git-sync/content-configuration
+
+root: ./
+
+structure:
+  readme: README.md
+  summary: SUMMARY.md

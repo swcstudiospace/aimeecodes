@@ -1,0 +1,17 @@
+$schema: https://api.gitbook.com/openapi.yaml#/components/schemas/GitSyncSiteConfig
+# Site-wide Git Sync for the Aimee Codes monorepo.
+#
+# GitBook maps each space to its own directory. The Project directory is this
+# repository root; `docs.yaml` must live there. Each space directory is
+# self-contained (its own .gitbook.yaml, README.md, SUMMARY.md, assets) —
+# GitBook does not share content or assets between mapped directories.
+#
+# Reference: https://gitbook.com/docs/docs-as-code/git-sync/monorepos
+site:
+  structure:
+    - type: space
+      key: documentation
+      title: Aimee Codes Documentation
+      path: documentation
+      content:
+        directory: ./documentation
