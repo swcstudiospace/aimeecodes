@@ -124,8 +124,7 @@ jobs:
     strategy:
       matrix:
         repository:
-        - antinomyhq/npm-omega-loops
-        - antinomyhq/npm-forgecode
+        - swcstudiospace/npm-aimee-codes
     steps:
     - name: Checkout Code
       uses: actions/checkout@v6
