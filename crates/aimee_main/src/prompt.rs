@@ -10,14 +10,12 @@ use nu_ansi_term::{Color, Style};
 use crate::display_constants::markers;
 use crate::utils::humanize_number;
 
-// Nerd font symbols — left prompt
-const DIR_SYMBOL: &str = "\u{ea83}"; // 󪃃  folder icon
-const BRANCH_SYMBOL: &str = "\u{f418}"; //   branch icon
-const SUCCESS_SYMBOL: &str = "\u{f013e}"; // 󰄾  chevron
-
 // Nerd font symbols — right prompt (ZSH rprompt)
 const AGENT_SYMBOL: &str = "\u{f167a}";
 const MODEL_SYMBOL: &str = "\u{ec19}";
+
+/// Warp's prompt opens with a solid accent block (two half-block glyphs).
+const WARP_INPUT_BLOCK: &str = "\u{258c}\u{258c}"; // ▌▌
 
 /// Terminal width at which the reasoning effort label switches from the
 /// compact three-letter form (e.g. `MED`) to the full uppercase label
@@ -62,20 +60,14 @@ impl AimeePrompt {
     }
 
     pub fn render_prompt_left(&self) -> Cow<'_, str> {
-        // Left prompt layout:
+        // Warp-style input block:
         //
-        //   AGENT_NAME  󪃃 dir   branch
-        //   󰄾
+        //   ▌▌ dir  branch
         //
-        // Colors:
-        //   agent  → bold white  (identifies the active agent)
-        //   dir    → bold cyan
-        //   branch → bold green
-        //   chevron → bold green
-
-        let dir_style = crate::theme::dir_style();
-        let branch_style = crate::theme::branch_style();
-        let chevron_style = crate::theme::chevron_style();
+        // Colors (Warp):
+        //   block   → accent blue, bold
+        //   dir     → near-white
+        //   branch  → dim muted
 
         let current_dir = self
             .cwd
@@ -84,35 +76,35 @@ impl AimeePrompt {
             .map(String::from)
             .unwrap_or_else(|| markers::EMPTY.to_string());
 
-        let mut result = String::with_capacity(160);
+        let mut result = String::with_capacity(120);
 
-        // Ratatui slash-command chips sit above the directory line so every
-        // interactive turn shows :aimee / :muse / :sage without a full redraw.
-        writeln!(result, "{}", crate::banner::chips_ansi()).unwrap();
-
-        // Directory — folder icon + name, bold cyan
+        // Warp's input starts with a solid accent block on the prompt line.
         write!(
             result,
             "{}",
-            dir_style.paint(format!("{DIR_SYMBOL} {current_dir}"))
+            crate::theme::warp_input_block_style().paint(WARP_INPUT_BLOCK)
         )
         .unwrap();
 
-        // Git branch — branch icon + name, bold green (only when present and
-        // different from the directory name, matching existing behaviour)
+        // Directory — plain near-white after the block.
+        write!(
+            result,
+            " {}",
+            crate::theme::prompt_dir_style().paint(&current_dir)
+        )
+        .unwrap();
+
+        // Git branch — dim muted (Warp shows branch quietly).
         if let Some(branch) = self.git_branch.as_deref()
-            && branch != current_dir
+            && branch != current_dir.as_str()
         {
             write!(
                 result,
                 " {}",
-                branch_style.paint(format!("{BRANCH_SYMBOL} {branch}"))
+                crate::theme::prompt_branch_style().paint(branch)
             )
             .unwrap();
         }
-
-        // Second line: success chevron
-        write!(result, "\n{} ", chevron_style.paint(SUCCESS_SYMBOL)).unwrap();
 
         Cow::Owned(result)
     }
@@ -297,12 +289,12 @@ mod tests {
         let prompt = AimeePrompt::default();
         let actual = prompt.render_prompt_left();
 
-        // Starship directory icon present
-        assert!(actual.contains(DIR_SYMBOL));
-        // Starship success chevron present
-        assert!(actual.contains(SUCCESS_SYMBOL));
-        assert!(actual.contains(":aimee"));
-        assert!(actual.contains(":muse"));
+        // Warp input block leads the line.
+        assert!(actual.contains(WARP_INPUT_BLOCK));
+        // Test cwd "." has no file_name → placeholder marker renders.
+        assert!(actual.contains(markers::EMPTY));
+        // No chip row above the prompt anymore (Warp-quiet).
+        assert!(!actual.contains(":muse"));
     }
 
     #[test]
@@ -310,9 +302,7 @@ mod tests {
         let prompt = AimeePrompt { git_branch: Some("main".to_string()), ..Default::default() };
         let actual = prompt.render_prompt_left();
 
-        // Agent name is on the right prompt, not the left
-        // Branch icon and name present
-        assert!(actual.contains(BRANCH_SYMBOL));
+        // Branch renders quietly after the directory.
         assert!(actual.contains("main"));
     }
 
