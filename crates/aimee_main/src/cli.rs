@@ -210,6 +210,11 @@ pub enum PodCommand {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
         args: Vec<String>,
     },
+    /// Connect via the Anda Engine bridge (activity probe + pod ssh).
+    Connect {
+        /// Workspace id to connect to.
+        workspace: String,
+    },
     /// Run a command inside a workspace.
     Exec {
         /// Workspace id (`aimee pod up --id`).

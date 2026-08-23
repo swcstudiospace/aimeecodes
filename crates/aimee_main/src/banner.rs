@@ -233,7 +233,7 @@ pub fn render_splash(buf: &mut Buffer, area: Rect) {
             Constraint::Length(1),
         ])
         .split(chip_area);
-        let per_row = (CHIPS.len() + 2) / 3;
+        let per_row = CHIPS.len().div_ceil(3);
         for (row_idx, row) in rows.iter().enumerate() {
             let start = row_idx * per_row;
             let end = (start + per_row).min(CHIPS.len());

@@ -69,6 +69,7 @@ impl<F> CommandLoaderService<F> {
                 ),
                 ("test-plan", include_str!("../../../commands/test-plan.md")),
                 ("swarm", include_str!("../../../commands/swarm.md")),
+                ("master", include_str!("../../../commands/master.md")),
                 // User-facing prompt templates (show in : / palette)
                 (
                     "tpl-explain",

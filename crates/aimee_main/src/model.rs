@@ -298,14 +298,8 @@ impl AimeeCommandManager {
 
     pub fn parse(&self, input: &str) -> anyhow::Result<AppCommand> {
         // Shell commands (start with !) bypass Clap entirely.
-        if input.trim().starts_with('!') {
-            return Ok(AppCommand::Shell(
-                input
-                    .strip_prefix('!')
-                    .unwrap_or_default()
-                    .trim()
-                    .to_string(),
-            ));
+        if let Some(shell) = input.trim().strip_prefix('!') {
+            return Ok(AppCommand::Shell(shell.trim().to_string()));
         }
 
         let trimmed = input.trim();
