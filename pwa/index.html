@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#FF5AC8" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="description" content="Aimee Codes — CLI agent flock. Implement, plan, research. Warp-clean terminal. Bubblegum pink." />
+  <meta property="og:title" content="Aimee Codes" />
+  <meta property="og:description" content="CLI agent flock with Super Grok specialists. Terminal TUI today. Installable PWA next." />
+  <meta property="og:image" content="./shots/cli-banner.png" />
+  <title>Aimee Codes</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icons/icon-192.png" type="image/png" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #07050c;
+      --bg-elev: #120a16;
+      --fg: #f7eef5;
+      --muted: #b59ab0;
+      --line: color-mix(in srgb, var(--accent) 28%, transparent);
+      --accent: #FF5AC8;          /* bubblegum pink */
+      --accent-2: #ff8ad8;
+      --accent-deep: #e01fa0;
+      --void: #05030a;
+      --ok: #28c840;
+      --warn: #febc2e;
+      --err: #ff5f57;
+      --spot: color-mix(in srgb, var(--accent) 22%, transparent);
+      --radius: 14px;
+      --font: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      --font-term: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+      --max: 1120px;
+    }
+    html[data-theme="light"] {
+      --bg: #fff5fb;
+      --bg-elev: #ffffff;
+      --fg: #2a1024;
+      --muted: #7a4f6e;
+      --line: color-mix(in srgb, var(--accent) 26%, #e8cfe0);
+      --void: #ffe8f6;
+      --spot: color-mix(in srgb, var(--accent) 16%, transparent);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.55;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    a:hover { color: var(--accent); }
+    .wrap { width: min(var(--max), calc(100% - 2.5rem)); margin-inline: auto; }
+    .spot {
+      pointer-events: none;
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(520px circle at var(--sx, 50%) var(--sy, 12%), var(--spot), transparent 58%),
+        radial-gradient(700px 420px at 90% 80%, color-mix(in srgb, var(--accent-2) 10%, transparent), transparent 50%);
+    }
+    .particles { pointer-events: none; position: fixed; inset: 0; overflow: hidden; z-index: 0; }
+    .particles span {
+      position: absolute; border-radius: 999px; background: color-mix(in srgb, var(--fg) 28%, transparent);
+      animation: drift linear infinite;
+    }
+    @keyframes drift {
+      0% { transform: translateY(0) translateX(0); opacity: .15; }
+      50% { opacity: .55; }
+      100% { transform: translateY(-40vh) translateX(12px); opacity: .1; }
+    }
+    header.nav {
+      position: sticky; top: 0; z-index: 20;
+      backdrop-filter: blur(12px);
+      background: color-mix(in srgb, var(--bg) 78%, transparent);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; padding: .9rem 0;
+    }
+    .brand {
+      display: flex; align-items: baseline; gap: .65rem;
+      font-weight: 700; letter-spacing: .04em;
+    }
+    .mark {
+      color: var(--accent); font-size: 1.45rem; letter-spacing: 0;
+      text-shadow: 0 0 24px color-mix(in srgb, var(--accent) 55%, transparent);
+    }
+    .nav-links { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: .4rem; border: 1px solid transparent; border-radius: 999px;
+      padding: .55rem 1rem; font: inherit; font-weight: 600; font-size: .86rem;
+      cursor: pointer; text-decoration: none !important;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary {
+      background: var(--accent); color: #1a0614;
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent),
+                  0 10px 40px color-mix(in srgb, var(--accent) 28%, transparent);
+    }
+    .btn-primary:hover { background: var(--accent-2); color: #1a0614; }
+    .btn-ghost {
+      background: transparent; color: var(--fg);
+      border-color: var(--line);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .icon-btn {
+      width: 2.4rem; height: 2.4rem; border-radius: 999px;
+      border: 1px solid var(--line); background: transparent; color: var(--fg);
+      cursor: pointer; font: inherit;
+    }
+    main { position: relative; z-index: 1; }
+    .hero {
+      padding: clamp(2.5rem, 7vw, 5.5rem) 0 2rem;
+      display: grid; gap: 2rem;
+    }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: .5rem;
+      color: var(--accent); font-size: .78rem; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase;
+    }
+    .eyebrow::before {
+      content: ""; width: .55rem; height: .55rem; border-radius: 999px;
+      background: var(--accent); box-shadow: 0 0 16px var(--accent);
+    }
+    h1 {
+      margin: .6rem 0 0; font-size: clamp(2.1rem, 5.4vw, 3.55rem);
+      line-height: 1.08; font-weight: 600; letter-spacing: -.02em;
+      text-wrap: balance;
+    }
+    h1 .pink {
+      color: var(--accent);
+      background: linear-gradient(120deg, var(--accent), var(--accent-2) 55%, #fff 140%);
+      -webkit-background-clip: text; background-clip: text;
+      color: transparent;
+    }
+    .lede {
+      max-width: 42rem; color: var(--muted); font-size: clamp(.95rem, 1.6vw, 1.08rem);
+      text-wrap: pretty;
+    }
+    .cta-row { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: .4rem; }
+    .meta-row {
+      display: flex; flex-wrap: wrap; gap: .75rem 1.25rem;
+      color: var(--muted); font-size: .78rem; margin-top: .35rem;
+    }
+    .meta-row strong { color: var(--fg); font-weight: 600; }
+    .shot-stage {
+      border: 1px solid var(--line); border-radius: calc(var(--radius) + 4px);
+      background: var(--bg-elev);
+      box-shadow: 0 30px 80px color-mix(in srgb, #000 45%, transparent),
+                  0 0 0 1px color-mix(in srgb, var(--accent) 12%, transparent);
+      overflow: hidden;
+    }
+    .shot-stage img {
+      display: block; width: 100%; height: auto;
+      background: #0a0610;
+    }
+    section.block { padding: clamp(2.5rem, 6vw, 4.5rem) 0; }
+    .section-kicker {
+      color: var(--accent); font-size: .75rem; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase; margin: 0 0 .5rem;
+    }
+    h2 {
+      margin: 0 0 .75rem; font-size: clamp(1.45rem, 3vw, 2rem);
+      font-weight: 600; letter-spacing: -.015em; text-wrap: balance;
+    }
+    .section-copy { color: var(--muted); max-width: 40rem; margin: 0 0 1.6rem; }
+    .grid-3 {
+      display: grid; gap: 1rem;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .grid-2 {
+      display: grid; gap: 1rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    @media (max-width: 860px) {
+      .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    }
+    .card {
+      border: 1px solid var(--line); border-radius: var(--radius);
+      background: color-mix(in srgb, var(--bg-elev) 92%, var(--accent) 8%);
+      padding: 1.15rem 1.15rem 1.25rem;
+      min-height: 100%;
+    }
+    .card h3 {
+      margin: 0 0 .45rem; font-size: 1rem; font-weight: 600;
+    }
+    .card p { margin: 0; color: var(--muted); font-size: .9rem; }
+    .card .code {
+      display: inline-block; margin-top: .7rem;
+      font-family: var(--font-term); font-size: .78rem;
+      color: var(--accent); border: 1px solid var(--line);
+      border-radius: 8px; padding: .25rem .5rem;
+      background: color-mix(in srgb, var(--void) 70%, transparent);
+    }
+    .shot-grid {
+      display: grid; gap: 1rem;
+      grid-template-columns: 1.15fr .85fr;
+    }
+    @media (max-width: 900px) {
+      .shot-grid { grid-template-columns: 1fr; }
+    }
+    .shot-card {
+      border: 1px solid var(--line); border-radius: var(--radius);
+      overflow: hidden; background: var(--bg-elev);
+    }
+    .shot-card figcaption {
+      padding: .75rem 1rem; border-top: 1px solid var(--line);
+      font-size: .8rem; color: var(--muted);
+    }
+    .shot-card figcaption strong { color: var(--fg); }
+    .shot-card img { width: 100%; display: block; background: #0a0610; }
+    .stack { display: grid; gap: 1rem; }
+    .install {
+      border: 1px solid var(--line); border-radius: calc(var(--radius) + 2px);
+      padding: 1.25rem; background:
+        linear-gradient(145deg, color-mix(in srgb, var(--accent) 14%, transparent), transparent 55%),
+        var(--bg-elev);
+    }
+    pre.term {
+      margin: .9rem 0 0; padding: 1rem 1.05rem; overflow: auto;
+      border-radius: 12px; border: 1px solid var(--line);
+      background: #0a0610; color: #f5e9f2;
+      font-family: var(--font-term); font-size: .84rem; line-height: 1.55;
+    }
+    pre.term .c { color: var(--accent); }
+    pre.term .d { color: var(--muted); }
+    .faq details {
+      border: 1px solid var(--line); border-radius: 12px;
+      padding: .9rem 1rem; background: var(--bg-elev);
+    }
+    .faq details + details { margin-top: .65rem; }
+    .faq summary {
+      cursor: pointer; font-weight: 600; list-style: none;
+    }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq p { color: var(--muted); margin: .55rem 0 0; font-size: .92rem; }
+    footer.site {
+      border-top: 1px solid var(--line); padding: 2rem 0 3rem;
+      color: var(--muted); font-size: .8rem;
+    }
+    footer.site .row {
+      display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+      align-items: center;
+    }
+    .pill-row { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1rem; }
+    .pill {
+      border: 1px solid var(--line); border-radius: 999px;
+      padding: .3rem .65rem; font-size: .72rem; color: var(--muted);
+    }
+    .pill em { color: var(--accent); font-style: normal; font-weight: 600; }
+    @media (prefers-reduced-motion: reduce) {
+      .particles span, .btn { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="spot" aria-hidden="true"></div>
+  <div class="particles" id="particles" aria-hidden="true"></div>
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="./index.html" style="text-decoration:none">
+        <span class="mark">æ</span>
+        <span>Aimee Codes</span>
+      </a>
+      <div class="nav-links">
+        <a class="btn btn-ghost" href="#cli">CLI</a>
+        <a class="btn btn-ghost" href="#agents">Agents</a>
+        <a class="btn btn-ghost" href="#install">Install</a>
+        <a class="btn btn-ghost" href="./app.html">Open app</a>
+        <button class="icon-btn" id="themeToggle" type="button" title="Toggle theme" aria-label="Toggle theme">◐</button>
+        <a class="btn btn-primary" href="#install">Get CLI</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <div>
+        <p class="eyebrow">CLI agent flock · Super Grok</p>
+        <h1>
+          Code with a flock.<br />
+          <span class="pink">Bubblegum-sharp. Warp-clean.</span>
+        </h1>
+        <p class="lede">
+          Aimee Codes is the terminal agent that ships with 17 specialists,
+          enterprise slash commands, and prompt templates — displayed like Warp,
+          orchestrated like Hermes, pink like bubblegum.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#install">Install aimee</a>
+          <a class="btn btn-ghost" href="#cli">See the CLI</a>
+          <a class="btn btn-ghost" href="./app.html">Launch PWA shell</a>
+        </div>
+        <div class="meta-row">
+          <span><strong>17</strong> built-in agents</span>
+          <span><strong>39</strong> slash / colon commands</span>
+          <span><strong>JetBrains Mono</strong> + IBM Plex Mono</span>
+        </div>
+        <div class="pill-row">
+          <span class="pill"><em>:aimee</em> implement</span>
+          <span class="pill"><em>:muse</em> plan</span>
+          <span class="pill"><em>:sage</em> research</span>
+          <span class="pill"><em>/swarm</em> fan-out</span>
+          <span class="pill"><em>:tpl-*</em> templates</span>
+        </div>
+      </div>
+      <figure class="shot-stage">
+        <img src="./shots/cli-banner.png" width="1200" height="640" alt="Aimee Codes CLI banner — Warp palette, 17 specialists" />
+      </figure>
+    </section>
+
+    <section class="block wrap" id="cli">
+      <p class="section-kicker">Product</p>
+      <h2>The CLI, in motion.</h2>
+      <p class="section-copy">
+        Same structure as ClippyOS product surfaces — real captures of the packaged
+        <code>aimee</code> binary: banner, command palette packs, and the agent roster.
+      </p>
+      <div class="shot-grid">
+        <figure class="shot-card">
+          <img src="./shots/cli-commands.png" alt="aimee list cmd — enterprise and tpl-* commands" />
+          <figcaption><strong>Commands</strong> — enterprise packs + <code>:tpl-*</code> templates in one palette.</figcaption>
+        </figure>
+        <div class="stack">
+          <figure class="shot-card">
+            <img src="./shots/cli-agents.png" alt="aimee list agent — full specialist flock" />
+            <figcaption><strong>Agents</strong> — loop + FE / BE / PLAT specialists on Super Grok.</figcaption>
+          </figure>
+          <article class="card">
+            <h3>Type <code>:</code> or <code>/</code></h3>
+            <p>Empty-line palette opens every slash command and template. Tab still completes mid-line.</p>
+            <span class="code">:tpl-handoff ship OAuth · /review · /swarm</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="block wrap" id="agents">
+      <p class="section-kicker">Flock</p>
+      <h2>What you actually get</h2>
+      <p class="section-copy">Benefits of the agent OS — not the plumbing underneath it.</p>
+      <div class="grid-3">
+        <article class="card">
+          <h3>Loop engineering</h3>
+          <p>Sage researches, Muse plans, Aimee implements and verifies. Stay in role; ground claims in the tree.</p>
+          <span class="code">:sage · :muse · :aimee</span>
+        </article>
+        <article class="card">
+          <h3>Specialist swarm</h3>
+          <p>Fan out FE, BE, and platform lanes in parallel via <code>task</code> — Super Grok–style handoffs, Warp-clean chips.</p>
+          <span class="code">/swarm · :tpl-handoff</span>
+        </article>
+        <article class="card">
+          <h3>Enterprise packs</h3>
+          <p>Review, harden, incident, ship, SLO, threat-model, compliance — XML-structured prompts ready for real work.</p>
+          <span class="code">/review · /ship · /incident</span>
+        </article>
+        <article class="card">
+          <h3>Prompt templates</h3>
+          <p>Fifteen <code>tpl-*</code> starters: debug, TDD, PR, design, security pass, release notes, and more.</p>
+          <span class="code">:tpl-debug · :tpl-tdd</span>
+        </article>
+        <article class="card">
+          <h3>Warp palette</h3>
+          <p>Truecolor timeline lanes for TOOL / SKILL / AGENT / DONE — JetBrains Mono in the terminal chrome.</p>
+          <span class="code">│ TOOL  Read · AGNT FE_RUST →</span>
+        </article>
+        <article class="card">
+          <h3>PWA shell</h3>
+          <p>Installable browser/mobile surface with the same bubblegum mark. CLI remains source of truth.</p>
+          <span class="code"><a href="./app.html">Open app shell →</a></span>
+        </article>
+      </div>
+    </section>
+
+    <section class="block wrap" id="install">
+      <p class="section-kicker">Access</p>
+      <h2>Install the CLI. Pink stays on.</h2>
+      <p class="section-copy">Debug package from the monorepo — same path we use for smoke tests.</p>
+      <div class="install">
+        <div class="cta-row">
+          <a class="btn btn-primary" href="https://github.com/swcstudiospace/omegaloops">GitHub</a>
+          <a class="btn btn-ghost" href="./app.html">Open PWA</a>
+        </div>
+        <pre class="term"><span class="d"># from the aimeecodes checkout</span>
+<span class="c">cd</span> ~/src/repos/aimeecodes
+<span class="c">bash</span> scripts/dev-aimee.sh all
+<span class="c">export</span> PATH="$HOME/.local/bin:$PATH"
+<span class="c">aimee</span> --version
+<span class="c">aimee</span> banner
+<span class="c">aimee</span> list cmd --porcelain
+<span class="d"># interactive</span>
+<span class="c">aimee</span>
+<span class="d"># then type : or / for the command menu</span></pre>
+      </div>
+    </section>
+
+    <section class="block wrap faq" id="faq">
+      <p class="section-kicker">FAQ</p>
+      <h2>Frequently asked</h2>
+      <details open>
+        <summary>What is Aimee Codes?</summary>
+        <p>A Rust CLI / TUI coding agent with a built-in flock of specialists, slash commands, and prompt templates — packaged as <code>aimee</code>.</p>
+      </details>
+      <details>
+        <summary>How is this like ClippyOS?</summary>
+        <p>Same marketing posture and typeface family (IBM Plex Mono), sticky mono nav, product-shot sections, and clear CTAs — recolored to bubblegum pink for Aimee.</p>
+      </details>
+      <details>
+        <summary>Which font should I use in the terminal?</summary>
+        <p><strong>JetBrains Mono</strong> (Warp default mono). The landing uses IBM Plex Mono for UI chrome to match ClippyOS; terminal screenshots use JetBrains Mono.</p>
+      </details>
+      <details>
+        <summary>Where is the installable app?</summary>
+        <p>The PWA shell lives at <a href="./app.html">app.html</a>. Install from Chrome/Edge/Safari after opening it over HTTPS or localhost.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="site">
+    <div class="wrap row">
+      <div>© Aimee Codes · Spectrum Web Co · bubblegum on void</div>
+      <div class="nav-links">
+        <a href="./app.html">App</a>
+        <a href="#install">Install</a>
+        <a href="https://os.swcstudio.space/">ClippyOS ref</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const key = "aimee-landing-theme";
+      try {
+        let t = localStorage.getItem(key);
+        if (t !== "light" && t !== "dark") {
+          t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        root.setAttribute("data-theme", t);
+        root.style.colorScheme = t;
+      } catch (_) {
+        root.setAttribute("data-theme", "dark");
+      }
+      document.getElementById("themeToggle")?.addEventListener("click", () => {
+        const next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+        root.setAttribute("data-theme", next);
+        root.style.colorScheme = next;
+        try { localStorage.setItem(key, next); } catch (_) {}
+      });
+
+      // soft pointer spotlight
+      const onMove = (e) => {
+        const x = (e.clientX / innerWidth) * 100;
+        const y = (e.clientY / innerHeight) * 100;
+        document.documentElement.style.setProperty("--sx", x + "%");
+        document.documentElement.style.setProperty("--sy", y + "%");
+      };
+      window.addEventListener("pointermove", onMove, { passive: true });
+
+      // particles
+      const host = document.getElementById("particles");
+      if (host && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        for (let i = 0; i < 14; i++) {
+          const s = document.createElement("span");
+          const size = 2 + (i % 3);
+          s.style.left = ((i * 17) % 100) + "%";
+          s.style.top = ((i * 29) % 100) + "%";
+          s.style.width = size + "px";
+          s.style.height = size + "px";
+          s.style.animationDelay = (i * 0.35) + "s";
+          s.style.animationDuration = (6 + (i % 5)) + "s";
+          host.appendChild(s);
+        }
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "Aimee Codes",
+  "short_name": "Aimee",
+  "description": "WEB3-native AI coding agent. Installable on browser and mobile.",
+  "start_url": "./app.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#07050c",
+  "theme_color": "#FF5AC8",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
