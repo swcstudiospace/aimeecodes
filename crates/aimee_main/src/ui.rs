@@ -4838,8 +4838,21 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
                     self.writeln(title.display())?;
                 }
                 ChatResponseContent::ToolOutput(text) => {
+                    // Warp indents tool payload under the tool header so the
+                    // eye groups output with its TOOL lane line.
                     writer.finish()?;
-                    self.writeln(text)?;
+                    let indented = text
+                        .lines()
+                        .map(|line| {
+                            if line.trim().is_empty() {
+                                String::from(line)
+                            } else {
+                                format!("    {line}")
+                            }
+                        })
+                        .collect::<Vec<_>>()
+                        .join("\n");
+                    self.writeln(indented)?;
                 }
                 ChatResponseContent::Markdown { text, partial: _ } => {
                     writer.write(&text)?;

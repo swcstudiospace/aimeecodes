@@ -95,6 +95,21 @@ pub fn chevron_style() -> Style {
     Style::new().bold().fg(palette::LIME)
 }
 
+/// Style for the Warp-style solid input block at the start of the prompt.
+pub fn warp_input_block_style() -> Style {
+    Style::new().bold().fg(palette::CYAN)
+}
+
+/// Directory text after the input block (Warp: plain body color).
+pub fn prompt_dir_style() -> Style {
+    Style::new().fg(palette::NEAR_WHITE)
+}
+
+/// Git branch text (Warp: quiet, dim).
+pub fn prompt_branch_style() -> Style {
+    Style::new().fg(palette::MUTED)
+}
+
 /// Banner line colors cycling Warp blue → violet → magenta → gold.
 pub fn banner_line_color(index: usize) -> Color {
     match index % 4 {

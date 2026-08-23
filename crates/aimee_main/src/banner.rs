@@ -195,26 +195,35 @@ fn render_chips_slice(
     y: u16,
     width: u16,
     chips: &[(&str, &str)],
-    color_offset: usize,
+    _color_offset: usize,
 ) {
+    // Warp pill style: key on a filled accent pill, role in muted text —
+    // one accent per chip, no rainbow cycling.
+    const PILL_ACCENTS: [ratatui::style::Color; 4] = [
+        theme::palette::RATATUI_CYAN,
+        theme::palette::RATATUI_VIOLET,
+        theme::palette::RATATUI_MAGENTA,
+        theme::palette::RATATUI_LIME,
+    ];
     let mut cursor = x;
     for (index, (key, label)) in chips.iter().enumerate() {
+        let accent = PILL_ACCENTS[index % PILL_ACCENTS.len()];
         let key_text = format!(" {key} ");
-        let label_text = format!(" {label} ");
         let key_style = Style::default()
             .fg(theme::palette::RATATUI_VOID)
-            .bg(theme::banner_line_ratatui(color_offset + index))
-            .add_modifier(Modifier::BOLD);
-        let label_style = Style::default()
-            .fg(theme::banner_line_ratatui(color_offset + index))
-            .bg(theme::palette::RATATUI_VOID)
+            .bg(accent)
             .add_modifier(Modifier::BOLD);
         buf.set_stringn(cursor, y, &key_text, width as usize, key_style);
         cursor = cursor.saturating_add(key_text.chars().count() as u16);
-        buf.set_stringn(cursor, y, &label_text, width as usize, label_style);
+        let label_text = format!(" {label}  ");
+        buf.set_stringn(
+            cursor,
+            y,
+            &label_text,
+            width as usize,
+            Style::default().fg(theme::palette::RATATUI_MUTED),
+        );
         cursor = cursor.saturating_add(label_text.chars().count() as u16);
-        buf.set_stringn(cursor, y, "  ", width as usize, Style::default());
-        cursor = cursor.saturating_add(2);
         if cursor >= x.saturating_add(width) {
             break;
         }

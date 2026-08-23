@@ -50,12 +50,13 @@ fn styled_loader_line(
         .saturating_sub(WRAP_GUARD_COLUMNS)
         .max(MIN_TERMINAL_WIDTH);
 
-    let tick = tick.green().to_string();
+    // Warp accent: tick in Warp blue, label in near-white (not terminal green).
+    let tick = tick.truecolor(0x01, 0xA4, 0xFF).to_string();
     let elapsed = elapsed.white().to_string();
     let fixed = format!("{tick}  {elapsed}");
     let message_width = max_width.saturating_sub(visible_width(&fixed)).max(1);
     let message = truncate_to_visible_width(message, message_width)
-        .green()
+        .truecolor(0xE6, 0xE6, 0xE6)
         .bold()
         .to_string();
     let styled = format!("{tick} {message} {elapsed}");
