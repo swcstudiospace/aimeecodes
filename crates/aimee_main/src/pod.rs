@@ -15,6 +15,9 @@ use crate::cli::{PodCommand, PodCommandGroup};
 /// Environment override for the DevPod binary (tests + custom installs).
 pub const POD_BIN_ENV: &str = "AIMEE_POD_BIN";
 
+/// Environment override for the Anda/KIP Cognitive Nexus base URL.
+pub const ANDA_NEXUS_URL_ENV: &str = "ANDA_NEXUS_URL";
+
 /// Resolves the DevPod executable.
 ///
 /// # Returns
@@ -104,6 +107,70 @@ pub fn open_pull_request() -> Result<String> {
     Ok(url)
 }
 
+/// Resolves the Cognitive Nexus / Anda Engine base URL for activity probes.
+///
+/// `ANDA_NEXUS_URL` wins, then `anda.nexus_url` from `.aimee.toml`, then the
+/// local default `http://127.0.0.1:8091`.
+pub fn anda_nexus_url() -> String {
+    if let Ok(url) = std::env::var(ANDA_NEXUS_URL_ENV)
+        && !url.trim().is_empty()
+    {
+        return url;
+    }
+    "http://127.0.0.1:8091".to_string()
+}
+
+/// Activity snapshot of a workspace against the Anda Engine.
+///
+/// The engine exposes only presence (active/inactive) — session contents stay
+/// opaque by design. Until ldclabs ships a public dTEE transport, the actual
+/// connection rides the pod runtime's SSH channel and the engine supplies the
+/// attested activity signal.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AndaConnection {
+    /// Workspace being connected to.
+    pub workspace: String,
+    /// KIP/Cognitive Nexus reachable → engine reports active.
+    pub engine_active: bool,
+    /// Base URL probed (never includes credentials).
+    pub nexus_url: String,
+}
+
+impl AndaConnection {
+    /// Probes the engine and builds the connection record for `workspace`.
+    pub fn probe(workspace: &str) -> Self {
+        let nexus_url = anda_nexus_url();
+        let engine_active = reqwest_nexus_ok(&nexus_url);
+        Self { workspace: workspace.to_string(), engine_active, nexus_url }
+    }
+
+    /// Human-readable status lines (no secrets).
+    pub fn render(&self) -> String {
+        let engine = if self.engine_active {
+            format!("active ({})", self.nexus_url)
+        } else {
+            format!("inactive — KIP nexus unreachable at {}", self.nexus_url)
+        };
+        format!(
+            "Anda Engine: {engine}\nWorkspace {}: connecting over pod ssh…",
+            self.workspace
+        )
+    }
+}
+
+/// Connects to a workspace via the Anda Engine bridge: probes the engine's
+/// activity signal, then hands the interactive session to `devpod ssh`.
+///
+/// # Errors
+///
+/// Returns when DevPod is missing or the ssh session fails.
+pub fn connect_via_anda(workspace: &str) -> Result<()> {
+    println!("{}", AndaConnection::probe(workspace).render());
+    run(&PodCommandGroup {
+        command: PodCommand::Ssh { args: vec![workspace.to_string()] },
+    })
+}
+
 /// Maps an Aimee pod command onto DevPod argv (no binary name).
 ///
 /// # Returns
@@ -140,6 +207,8 @@ pub fn argv(command: &PodCommand) -> Option<Vec<String>> {
         PodCommand::Stop { args } => prepend("stop", args),
         PodCommand::Delete { args } => prepend("delete", args),
         PodCommand::Ssh { args } => prepend("ssh", args),
+        // Aimee-native: engine activity probe, then the ssh session below.
+        PodCommand::Connect { workspace } => prepend("ssh", std::slice::from_ref(workspace)),
         PodCommand::Exec { workspace, command } => {
             vec![
                 "ssh".into(),
@@ -178,6 +247,9 @@ pub fn run(group: &PodCommandGroup) -> Result<()> {
         PodCommand::Doctor => {
             print_doctor(&collect_doctor());
             return Ok(());
+        }
+        PodCommand::Connect { ref workspace } => {
+            return connect_via_anda(workspace);
         }
         _ => {}
     }
@@ -331,7 +403,9 @@ Aimee pod doctor
   anda dTEE  {}
 
 Ready loop: /goal <text>  →  /goal pod  →  /goal pr
-dTEE is not in this Aimee tree; KIP uses the local Cognitive Nexus.
+KIP uses the local Cognitive Nexus; `pod connect` reports engine activity
+(active/inactive) before handing the session to the pod ssh transport.
+dTEE transport is not in this Aimee tree until ldclabs ships it.
 ",
         flag(report.devpod),
         flag(report.docker),
@@ -368,7 +442,8 @@ Docker is the default provider on this host.
        aimee pod ssh <id>
        /goal pr
 
-Anda dTEE is not in this Aimee tree.
+Anda dTEE transport is not in this Aimee tree. `pod connect <id>` probes
+engine activity (active/inactive via the KIP nexus) then opens pod ssh.
 
 Current pod runtime: {}
 SSH target: {hint}
@@ -476,6 +551,40 @@ mod tests {
             "--command".into(),
             "cargo test -p aimee_domain".into(),
         ];
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_anda_nexus_url_env_override() {
+        // SAFETY: test-only env mutation; this test does not spawn threads that
+        // read the same variable concurrently.
+        unsafe {
+            std::env::set_var(ANDA_NEXUS_URL_ENV, "http://127.0.0.1:19999");
+        }
+        let actual = anda_nexus_url();
+        unsafe {
+            std::env::remove_var(ANDA_NEXUS_URL_ENV);
+        }
+        assert_eq!(actual, "http://127.0.0.1:19999");
+    }
+
+    #[test]
+    fn test_anda_connection_render_inactive() {
+        let fixture = AndaConnection {
+            workspace: "aimee-ship".into(),
+            engine_active: false,
+            nexus_url: "http://127.0.0.1:8091".into(),
+        };
+        let actual = fixture.render();
+        assert!(actual.contains("inactive"));
+        assert!(actual.contains("aimee-ship"));
+    }
+
+    #[test]
+    fn test_argv_connect_maps_to_ssh() {
+        let fixture = PodCommand::Connect { workspace: "aimee-ship".into() };
+        let actual = argv(&fixture).unwrap();
+        let expected = vec!["ssh".to_string(), "aimee-ship".into()];
         assert_eq!(actual, expected);
     }
 

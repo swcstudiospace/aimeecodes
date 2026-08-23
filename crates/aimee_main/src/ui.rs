@@ -2365,7 +2365,23 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
                 self.on_model_selection(None).await?;
             }
             AppCommand::Shell(ref command) => {
-                self.api.execute_shell_command_raw(command).await?;
+                if command.trim().is_empty() {
+                    self.writeln_title(TitleFormat::info(
+                        "Usage: !<command> — runs in the local shell (e.g. ! aimee pod ssh my-pod)",
+                    ))?;
+                } else {
+                    self.writeln_title(TitleFormat::info(format!("$ {command}")))?;
+                    match self.api.execute_shell_command_raw(command).await {
+                        Ok(status) if !status.success() => {
+                            let code = status.code().unwrap_or(1);
+                            self.writeln_title(TitleFormat::error(format!(
+                                "command exited with code {code}"
+                            )))?;
+                        }
+                        Ok(_) => {}
+                        Err(error) => return Err(error),
+                    }
+                }
             }
             AppCommand::Commit { max_diff_size, .. } => {
                 let args = CommitCommandGroup {

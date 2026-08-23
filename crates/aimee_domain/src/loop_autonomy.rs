@@ -122,6 +122,209 @@ impl GoalProbeSet {
     }
 }
 
+/// Complexity tier assigned by [`PromptUpgrade::analyze`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PromptDepth {
+    /// One focused ask.
+    Focused,
+    /// Two or more sequenced steps.
+    MultiStep,
+    /// System-wide or architectural scope.
+    Broad,
+}
+
+impl PromptDepth {
+    /// Canonical tag body used in the `<depth>` element.
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Focused => "focused",
+            Self::MultiStep => "multi-step",
+            Self::Broad => "broad",
+        }
+    }
+}
+
+/// Deterministic uplift of a raw prompt: depth tier, decomposed steps,
+/// constraints, and verification hints. No model call — pure string analysis
+/// so the hook never blocks or fails a turn.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PromptUplift {
+    /// Assigned complexity tier.
+    pub depth: PromptDepth,
+    /// Ordered steps when the prompt names several.
+    pub steps: Vec<String>,
+    /// Extracted must / must-not statements.
+    pub constraints: Vec<String>,
+    /// Verification signals found in the text (tests, builds, PRs).
+    pub verification: Vec<String>,
+}
+
+/// Words that mark a step boundary or an explicit instruction verb.
+const STEP_MARKERS: [&str; 12] = [
+    "then ",
+    "after that",
+    "next,",
+    "first ",
+    "finally ",
+    "implement",
+    "add ",
+    "fix ",
+    "refactor",
+    "migrate",
+    "ship ",
+    "wire ",
+];
+
+/// Words marking a hard requirement.
+const CONSTRAINT_MARKERS: [&str; 7] = [
+    "must ",
+    "must not ",
+    "never ",
+    "always ",
+    "do not ",
+    "don't ",
+    "no ",
+];
+
+/// Words signalling verification intent.
+const VERIFY_MARKERS: [&str; 8] = [
+    "test",
+    "cargo ",
+    "clippy",
+    "build",
+    "ci",
+    "benchmark",
+    "pr ",
+    "verify",
+];
+
+/// Words signalling system-wide scope.
+const BROAD_MARKERS: [&str; 6] = [
+    "architecture",
+    "system-wide",
+    "whole codebase",
+    "every crate",
+    "all crates",
+    "monorepo",
+];
+
+impl PromptUplift {
+    /// Analyzes `text` for depth, steps, constraints, and verification.
+    pub fn analyze(text: &str) -> Self {
+        let lowered = text.to_ascii_lowercase();
+        let mut constraints = Vec::new();
+        let mut verification = Vec::new();
+        for marker in CONSTRAINT_MARKERS {
+            if lowered.contains(marker) {
+                constraints.push(marker.trim().to_string());
+            }
+        }
+        for marker in VERIFY_MARKERS {
+            if lowered.contains(marker) {
+                verification.push(marker.trim().to_string());
+            }
+        }
+
+        let steps = Self::extract_steps(text);
+        let broad = BROAD_MARKERS.iter().any(|m| lowered.contains(m))
+            || lowered.split_whitespace().count() > 120;
+        let depth = if broad {
+            PromptDepth::Broad
+        } else if steps.len() >= 2 {
+            PromptDepth::MultiStep
+        } else {
+            PromptDepth::Focused
+        };
+
+        Self { depth, steps, constraints, verification }
+    }
+
+    /// Splits sequenced instructions into ordered steps. Numbered/bulleted
+    /// lines win; otherwise sentence boundaries near step markers are used.
+    fn extract_steps(text: &str) -> Vec<String> {
+        let bullet_steps: Vec<String> = text
+            .lines()
+            .map(str::trim)
+            .filter(|l| !l.is_empty())
+            .filter(|l| {
+                let head = l.chars().take(3).collect::<String>();
+                head.starts_with('-')
+                    || head.starts_with('*')
+                    || head.chars().next().is_some_and(|c| c.is_ascii_digit()) && head.contains('.')
+            })
+            .map(|l| {
+                l.trim_start_matches(|c: char| c == '-' || c == '*' || c.is_ascii_digit())
+                    .trim_start_matches('.')
+                    .trim()
+                    .to_string()
+            })
+            .filter(|s| !s.is_empty())
+            .collect();
+        if bullet_steps.len() >= 2 {
+            return bullet_steps;
+        }
+
+        let mut steps = Vec::new();
+        for sentence in text.split(['.', '\n']) {
+            let trimmed = sentence.trim();
+            if trimmed.is_empty() {
+                continue;
+            }
+            let lowered = trimmed.to_ascii_lowercase();
+            if STEP_MARKERS.iter().any(|m| lowered.contains(m)) {
+                steps.push(trimmed.to_string());
+            }
+        }
+        steps
+    }
+
+    /// Renders the `<uplift>` XML block (empty when nothing was detected).
+    pub fn render_xml(&self) -> String {
+        if matches!(self.depth, PromptDepth::Focused)
+            && self.steps.is_empty()
+            && self.constraints.is_empty()
+        {
+            return String::new();
+        }
+        let mut xml = String::from("  <uplift>\n");
+        xml.push_str(&format!("    <depth>{}</depth>\n", self.depth.as_str()));
+        if !self.steps.is_empty() {
+            xml.push_str("    <steps>\n");
+            for (i, step) in self.steps.iter().enumerate() {
+                xml.push_str(&format!(
+                    "      <step n=\"{}\">{}</step>\n",
+                    i + 1,
+                    escape_xml(step)
+                ));
+            }
+            xml.push_str("    </steps>\n");
+        }
+        if !self.constraints.is_empty() {
+            xml.push_str("    <constraints>\n");
+            for constraint in &self.constraints {
+                xml.push_str(&format!(
+                    "      <constraint>{}</constraint>\n",
+                    escape_xml(constraint)
+                ));
+            }
+            xml.push_str("    </constraints>\n");
+        }
+        if !self.verification.is_empty() {
+            xml.push_str("    <verification>");
+            let joined = self
+                .verification
+                .iter()
+                .map(String::as_str)
+                .collect::<Vec<_>>()
+                .join(", ");
+            xml.push_str(&escape_xml(&joined));
+            xml.push_str("</verification>\n");
+        }
+        xml.push_str("  </uplift>\n");
+        xml
+    }
+}
+
 /// Best-in-class XML envelope around a user prompt or goal.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PromptUpgrade {
@@ -131,16 +334,22 @@ pub struct PromptUpgrade {
 
 impl PromptUpgrade {
     /// Wraps `text` (plus optional goal context) in `<aimee_prompt>` tags.
-    /// Already-wrapped input is returned unchanged.
+    ///
+    /// The prompt is autonomously uplifted first ([`PromptUplift::analyze`]):
+    /// depth tier, decomposed steps, constraints, and verification hints are
+    /// added as structured context alongside the raw intent. Already-wrapped
+    /// input is returned unchanged.
     pub fn wrap(text: &str, goal: Option<&GoalState>) -> Self {
         let trimmed = text.trim();
         if trimmed.contains("<aimee_prompt") {
             return Self { xml: trimmed.to_string() };
         }
+        let uplift = PromptUplift::analyze(trimmed);
         let mut xml = String::from("<aimee_prompt version=\"1\">\n");
         xml.push_str("  <intent>\n");
         xml.push_str(&indent(trimmed, 4));
         xml.push_str("\n  </intent>\n");
+        xml.push_str(&uplift.render_xml());
         if let Some(goal) = goal {
             xml.push_str("  <standing_goal>");
             xml.push_str(&escape_xml(&goal.goal));
@@ -383,6 +592,55 @@ mod tests {
         assert!(actual.xml.contains("<intent>"));
         let again = PromptUpgrade::wrap(&actual.xml, None);
         assert_eq!(again.xml, actual.xml);
+    }
+
+    #[test]
+    fn test_prompt_uplift_detects_multistep() {
+        let fixture = "Fix the parser crash. Then implement tests. Finally wire the CLI flag.";
+        let actual = PromptUplift::analyze(fixture);
+        let expected_depth = PromptDepth::MultiStep;
+        assert_eq!(actual.depth, expected_depth);
+        assert_eq!(actual.steps.len(), 3);
+    }
+
+    #[test]
+    fn test_prompt_uplift_extracts_numbered_steps() {
+        let fixture = "Ship it\n1. Add the tool\n2. Register the variant\n3. Run clippy";
+        let actual = PromptUplift::analyze(fixture);
+        let expected = vec![
+            "Add the tool".to_string(),
+            "Register the variant".to_string(),
+            "Run clippy".to_string(),
+        ];
+        assert_eq!(actual.steps, expected);
+    }
+
+    #[test]
+    fn test_prompt_uplift_broad_on_architecture_scope() {
+        let fixture = "Restructure the monorepo build graph";
+        let actual = PromptUplift::analyze(fixture);
+        let expected_depth = PromptDepth::Broad;
+        assert_eq!(actual.depth, expected_depth);
+    }
+
+    #[test]
+    fn test_prompt_uplift_focused_stays_quiet() {
+        let fixture = "Rename the pod helper";
+        let actual = PromptUplift::analyze(fixture);
+        let expected = String::new();
+        assert_eq!(actual.render_xml(), expected);
+    }
+
+    #[test]
+    fn test_prompt_upgrade_embeds_uplift_block() {
+        let fixture =
+            "You must not rename the binary. First fix the trim bug. Then add regression tests.";
+        let actual = PromptUpgrade::wrap(fixture, None).xml;
+        assert!(actual.contains("<uplift>"));
+        assert!(actual.contains("<depth>multi-step</depth>"));
+        assert!(actual.contains("must not"));
+        // Intent still carries the raw text.
+        assert!(actual.contains("First fix the trim bug"));
     }
 
     #[test]

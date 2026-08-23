@@ -315,12 +315,18 @@ mod tests {
         // Test that invalid string pricing formats fail gracefully
         let fixture = load_fixture("model_invalid_pricing.json").await;
 
-        let actual = serde_json::from_value::<Model>(fixture);
-
-        // This should fail with a parsing error
-        assert!(actual.is_err());
-        let error_message = format!("{}", actual.unwrap_err());
+        // `Pricing` itself rejects non-numeric strings.
+        let raw_pricing = fixture["pricing"].clone();
+        let pricing_result = serde_json::from_value::<Pricing>(raw_pricing);
+        assert!(pricing_result.is_err());
+        let error_message = format!("{}", pricing_result.unwrap_err());
         assert!(error_message.contains("invalid string format for pricing value"));
+
+        // `Model` stays lenient so provider /model lists still load: the bad
+        // payload is dropped and pricing becomes None.
+        let actual = serde_json::from_value::<Model>(fixture);
+        assert!(actual.is_ok());
+        assert!(actual.unwrap().pricing.is_none());
     }
 
     #[tokio::test]

@@ -2,7 +2,7 @@
 source: crates/aimee_app/src/compact.rs
 expression: actual
 ---
-Use the following summary frames as the authoritative record of this Aimee Codes session. Do not re-explain or revisit them unless asked. Additional frames will be added as the conversation progresses. Stay in your current role: Sage researches, Muse plans, Aimee implements and verifies.
+Use the following summary frames as the authoritative record of this Aimee Codes session. Do not re-explain or revisit them unless asked. Additional frames will be added as the conversation progresses. Stay in role: Sage researches, Muse plans, Aimee implements and verifies. Specialists stay in their FE/BE/PLAT lane.
 
 ## Summary
 
@@ -43,7 +43,7 @@ Search for TODO comments
 
 ### 8. Assistant
 
-**Execute:** 
+**Execute:**
 ```
 cargo test
 ```
@@ -57,4 +57,4 @@ Great! Everything looks good.
 
 ---
 
-Continue the loop from this context. Do not restart research or planning that is already settled. Verify before claiming done.
+Continue from this context. Prefer parallel specialist tasks for independent workstreams. Verify on the tree before claiming done.
