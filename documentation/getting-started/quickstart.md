@@ -1,3 +1,3 @@
-# JSON schema (aimee.schema.json)
+# Quickstart
 
 STUB-PENDING: full content lands in an upcoming build task.

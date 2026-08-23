@@ -1,86 +1,90 @@
 # Table of contents
 
-* [Aimee Codes documentation](README.md)
+* [Aimee Codes](README.md)
 
 ## Getting started
 
-* [Quickstart](quickstart.md)
-* [The flock](flock.md)
-* [How to use](howto.md)
+* [What is Aimee Codes?](about.md)
+* [Quickstart](getting-started/quickstart.md)
+* [Installing](getting-started/install.md)
+* [Your first flock session](getting-started/first-session.md)
+* [The flock: Sage, Muse, Aimee](getting-started/the-flock.md)
+* [Three modes](getting-started/modes.md)
 
-## Usage
+## Daily usage
 
-* [CLI reference](cli.md)
-* [Configuration](configuration.md)
-* [ZSH plugin](zsh.md)
-* [Skills and commands](skills.md)
-* [Providers](providers.md)
+* [Everyday workflows](usage/workflows.md)
+* [The : prefix (ZSH)](usage/zsh-prefix.md)
+* [Slash commands](usage/commands.md)
+* [Plans and todos](usage/plans-and-todos.md)
+* [Swarm runs](usage/swarm.md)
+* [Session management](usage/sessions.md)
 
-## Product surfaces
+## Surfaces
 
-* [TUI](surfaces/tui.md)
-* [PWA](surfaces/pwa.md)
-* [Pods and sandboxes](ops/pod.md)
+* [Terminal UI](surfaces/tui.md)
+* [Web and mobile PWA](surfaces/pwa.md)
+* [Pods and sandboxes](surfaces/pods.md)
 
-## WEB3
+## Integrations
 
-* [Anda / KIP session pathways](web3/anda.md)
-* [Wallet](web3/wallet.md)
+* [Providers and model access](integrations/providers.md)
+* [Authentication and credentials](integrations/auth.md)
+* [GitHub and pull requests](integrations/github.md)
+* [Anda / KIP pathways (WEB3)](integrations/anda-kip.md)
+* [Wallet](integrations/wallet.md)
+* [Nix and reproducible installs](integrations/nix.md)
+* [Dev Container](integrations/devcontainer.md)
 
-## Operations
+## Concepts
 
-* [Install and Nix](ops/install.md)
-* [Cloud and services](ops/cloud.md)
-* [Security](security.md)
-* [Reliability](reliability.md)
-* [Best practices](best-practices.md)
-
-## Help
-
-* [Troubleshooting and FAQ](resources/troubleshooting.md)
-* [Migrating from Omega Loops](resources/migration.md)
-* [Glossary](resources/glossary.md)
+* [How Aimee thinks: the loop](concepts/loop.md)
+* [Autonomy levels and guardrails](concepts/autonomy.md)
+* [Tools: how agents touch your system](concepts/tools-overview.md)
+* [Skills, commands, and templates](concepts/skills-commands-templates.md)
+* [Configuration model](concepts/configuration.md)
+* [Persistence and sessions](concepts/persistence.md)
+* [Streaming pipeline](concepts/streaming.md)
 
 ## Architecture
 
 * [Architecture overview](architecture/overview.md)
+* [Crate map](architecture/crates.md)
 * [Domain — aimee_domain](architecture/domain.md)
 * [Application — aimee_app](architecture/app.md)
 * [Services — aimee_services](architecture/services.md)
-* [Composition root — aimee_api](architecture/api.md)
+* [API composition root — aimee_api](architecture/api.md)
 * [Infrastructure — aimee_infra](architecture/infra.md)
 * [Persistence — aimee_repo](architecture/persistence.md)
-* [Streaming pipeline](architecture/streaming.md)
+* [Tool macros — aimee_tool_macros](architecture/tool-macros.md)
+* [Supporting crates](architecture/support-crates.md)
 
-## Tool reference
+## Reference
 
+* [CLI reference](reference/cli.md)
+* [Config reference (.aimee.toml)](reference/config.md)
+* [Environment variables](reference/env-vars.md)
+* [Keyboard shortcuts](reference/keybindings.md)
+* [gRPC contract (aimee.proto)](reference/proto.md)
+* [JSON schema (aimee.schema.json)](reference/schema.md)
 * [Tool catalog](reference/tools/catalog.md)
-* [read](reference/tools/read.md)
-* [write](reference/tools/write.md)
-* [fs_search](reference/tools/fs_search.md)
-* [sem_search](reference/tools/sem_search.md)
-* [remove](reference/tools/remove.md)
-* [patch](reference/tools/patch.md)
-* [multi_patch](reference/tools/multi_patch.md)
-* [undo](reference/tools/undo.md)
-* [shell](reference/tools/shell.md)
-* [fetch](reference/tools/fetch.md)
-* [followup](reference/tools/followup.md)
-* [plan](reference/tools/plan.md)
-* [skill](reference/tools/skill.md)
-* [todo_write](reference/tools/todo_write.md)
-* [todo_read](reference/tools/todo_read.md)
-* [task](reference/tools/task.md)
+* [Filesystem tools](reference/tools/filesystem-tools.md)
+* [Search and web tools](reference/tools/search-web-tools.md)
+* [Execution tools](reference/tools/execution-tools.md)
+* [Workflow tools](reference/tools/workflow-tools.md)
 
-## API reference
+## Operations
 
-* [gRPC contract — aimee.proto](reference/proto.md)
-* [Config JSON schema](reference/schema.md)
-* [Environment variables](reference/env.md)
+* [Security model](operations/security.md)
+* [Reliability and recovery](operations/reliability.md)
+* [Cost awareness](operations/cost.md)
+* [Data privacy](operations/privacy.md)
+* [CI/CD of Aimee itself](operations/cicd.md)
+* [Testing and evals](operations/testing-evals.md)
 
-## Development
+## Help
 
-* [Testing](quality/testing.md)
-* [Evals and benchmarks](quality/evals.md)
-* [CI/CD](ops/cicd.md)
-* [Contributing to documentation](resources/contributing.md)
+* [Troubleshooting](help/troubleshooting.md)
+* [FAQ](help/faq.md)
+* [Migrating from Omega Loops](help/migration.md)
+* [Glossary](help/glossary.md)

@@ -1,3 +1,3 @@
-# JSON schema (aimee.schema.json)
+# Glossary
 
 STUB-PENDING: full content lands in an upcoming build task.

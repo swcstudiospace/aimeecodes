@@ -1,3 +1,3 @@
-# JSON schema (aimee.schema.json)
+# Security model
 
 STUB-PENDING: full content lands in an upcoming build task.
