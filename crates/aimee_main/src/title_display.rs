@@ -10,7 +10,6 @@
 use std::fmt;
 
 use aimee_domain::{Category, TitleFormat};
-use chrono::Local;
 use nu_ansi_term::Style;
 
 use crate::theme::palette;
@@ -97,12 +96,7 @@ impl TitleDisplay {
 
     fn format_with_colors(&self) -> String {
         let (label, chip_style) = self.chip();
-        let local_time: chrono::DateTime<Local> = self.inner.timestamp.into();
-        let gutter = Style::new().fg(palette::VIOLET).paint("│");
-        let clock = Style::new()
-            .fg(palette::VIOLET)
-            .dimmed()
-            .paint(format!("{}", local_time.format("%H:%M:%S")));
+        let gutter = Style::new().fg(palette::VIOLET).dimmed().paint("│");
 
         let title = match self.inner.category {
             Category::Error => Style::new()
@@ -145,11 +139,12 @@ impl TitleDisplay {
                 .to_string(),
         };
 
-        let mut buf = format!(
-            "{gutter} {} {}  {title}",
-            chip_style.paint(format!(" {label} ")),
-            clock,
-        );
+        // Warp-quiet: no clock on every line. The chip carries the kind; the
+        // title carries the payload.
+        let mut buf = format!("{gutter} {}", chip_style.paint(format!(" {label} ")));
+
+        buf.push_str("  ");
+        buf.push_str(&title);
 
         if let Some(ref sub_title) = self.inner.sub_title {
             // Agent handoffs get an arrow (Super Grok Heavy style hop).
@@ -180,12 +175,7 @@ impl TitleDisplay {
 
     fn format_plain(&self) -> String {
         let label = self.plain_chip();
-        let local_time: chrono::DateTime<Local> = self.inner.timestamp.into();
-        let mut buf = format!(
-            "| [{label}] [{}] {}",
-            local_time.format("%H:%M:%S"),
-            self.inner.title
-        );
+        let mut buf = format!("| [{label}] {}", self.inner.title);
         if let Some(ref sub_title) = self.inner.sub_title {
             if matches!(self.inner.category, Category::Agent) {
                 buf.push_str(&format!(" → {sub_title}"));

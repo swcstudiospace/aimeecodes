@@ -4586,15 +4586,9 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
         new_conversation: bool,
         id: ConversationId,
     ) -> Result<(), anyhow::Error> {
-        let mut title = if new_conversation {
-            "Initialize".to_string()
-        } else {
-            "Continue".to_string()
-        };
-
-        title.push_str(format!(" {}", id.into_string()).as_str());
-
-        self.writeln_title(TitleFormat::debug(title))?;
+        // Warp-quiet: the conversation id is metadata, not a timeline event.
+        // Keep it out of the visual flow but leave it available via :info.
+        let _ = (new_conversation, id);
         Ok(())
     }
 

@@ -46,21 +46,19 @@ fn styled_loader_line(
     terminal_width: usize,
 ) -> String {
     let elapsed = format_elapsed_time(elapsed);
-    let suffix = "· Ctrl+C to interrupt";
     let max_width = terminal_width
         .saturating_sub(WRAP_GUARD_COLUMNS)
         .max(MIN_TERMINAL_WIDTH);
 
     let tick = tick.green().to_string();
     let elapsed = elapsed.white().to_string();
-    let suffix = suffix.white().dimmed().to_string();
-    let fixed = format!("{tick}  {elapsed} {suffix}");
+    let fixed = format!("{tick}  {elapsed}");
     let message_width = max_width.saturating_sub(visible_width(&fixed)).max(1);
     let message = truncate_to_visible_width(message, message_width)
         .green()
         .bold()
         .to_string();
-    let styled = format!("{tick} {message} {elapsed} {suffix}");
+    let styled = format!("{tick} {message} {elapsed}");
 
     truncate_to_visible_width(&styled, max_width)
 }

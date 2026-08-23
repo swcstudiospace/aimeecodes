@@ -1,4 +1,4 @@
-use std::{fmt, io};
+use std::io;
 
 use aimee_tracker::VERSION;
 use colored::Colorize;
@@ -6,12 +6,11 @@ use ratatui::buffer::Buffer;
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
-use ratatui::widgets::{Block, BorderType, Fill, LineGauge, Paragraph, Row, Table, Tabs, Widget};
+use ratatui::widgets::{Fill, Paragraph, Widget};
 
 use crate::theme;
 
 const BANNER: &str = include_str!("banner");
-const TAGLINE: &str = "CLI agent flock  ·  17 specialists  ·  Warp palette";
 
 /// Built-in agent-switch chips (loop + FE / BE / PLAT roster).
 /// Keep in sync with `crates/aimee_repo/src/agents/*.md`.
@@ -44,48 +43,10 @@ pub fn agent_chip_count() -> usize {
     CHIPS.len()
 }
 
-/// Renders messages into a styled box with border characters.
-struct DisplayBox {
-    messages: Vec<String>,
-}
-
-impl DisplayBox {
-    /// Creates a new Box with the given messages.
-    fn new(messages: Vec<String>) -> Self {
-        Self { messages }
-    }
-}
-
-impl fmt::Display for DisplayBox {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let visible_len = |s: &str| console::measure_text_width(s);
-        let width: usize = self
-            .messages
-            .iter()
-            .map(|s| visible_len(s))
-            .max()
-            .unwrap_or(0)
-            + 4;
-        let top = format!("┌{}┐", "─".repeat(width.saturating_sub(2)));
-        let bottom = format!("└{}┘", "─".repeat(width.saturating_sub(2)));
-        let fmt_line = |s: &str| {
-            let padding = width.saturating_sub(4).saturating_sub(visible_len(s));
-            format!("│ {}{} │", s, " ".repeat(padding))
-        };
-
-        writeln!(f, "{}", top)?;
-        for msg in &self.messages {
-            writeln!(f, "{}", fmt_line(msg))?;
-        }
-        write!(f, "{}", bottom)
-    }
-}
-
 /// Displays the banner with version and command tips.
 ///
-/// The art, tagline, and slash-command chips are composed in a ratatui
-/// [`Buffer`] then flushed as ANSI so the live path uses the same renderer as
-/// future full-screen TUI surfaces.
+/// Warp-quiet landing: figlet art, one dim meta line, one compact command
+/// hint line, one agent-flock line. No frames, gauges, or tab bars.
 ///
 /// # Arguments
 ///
@@ -107,10 +68,6 @@ pub fn display(cli_mode: bool) -> io::Result<()> {
 
     print_command_sheet(cli_mode);
 
-    if !cli_mode {
-        display_zsh_encouragement();
-    }
-
     Ok(())
 }
 
@@ -122,7 +79,7 @@ fn print_ratatui_splash() {
     print!("{}", buffer_to_ansi(&buf));
 }
 
-/// Area large enough for the framed card: art + gauge + tabs + agent rows + tagline.
+/// Area for the quiet landing: art + meta line + width-wrapped flock rows.
 fn splash_area() -> Rect {
     let art_width = BANNER
         .lines()
@@ -134,185 +91,101 @@ fn splash_area() -> Rect {
         .lines()
         .filter(|line| !line.trim().is_empty())
         .count() as u16;
-    // art + gauge + loop tabs + 3 agent chip rows + tagline + font hint
-    Rect::new(0, 0, width, art_lines.saturating_add(9))
+    // art + meta + up to 5 flock rows (17 agents greedily wrap at ~82 cols).
+    Rect::new(0, 0, width, art_lines.saturating_add(6))
 }
 
-/// Paints a framed ratatui card: void fill, rounded Block, figlet art,
-/// loop LineGauge, full agent flock chips, and the tagline.
+/// Splits chips into rows that fit `width` columns, honoring each chip's
+/// rendered size (` key `, ` label `, 2-col gap).
+fn wrap_chips(width: u16) -> Vec<Vec<(String, String)>> {
+    let limit = width as usize;
+    let mut rows: Vec<Vec<(String, String)>> = Vec::new();
+    let mut current: Vec<(String, String)> = Vec::new();
+    let mut used = 0usize;
+    for (key, label) in CHIPS {
+        let chip_width = key.chars().count() + 2 + label.chars().count() + 2 + 2;
+        if !current.is_empty() && used + chip_width > limit {
+            rows.push(std::mem::take(&mut current));
+            used = 0;
+        }
+        used += chip_width;
+        current.push(((*key).to_string(), (*label).to_string()));
+    }
+    if !current.is_empty() {
+        rows.push(current);
+    }
+    rows
+}
+
+/// Paints the Warp-quiet landing: art, one dim meta row, wrapped flock rows.
 pub fn render_splash(buf: &mut Buffer, area: Rect) {
     Fill::new(" ")
         .style(Style::default().bg(theme::palette::RATATUI_VOID))
         .render(area, buf);
 
-    let frame = Block::bordered()
-        .border_type(BorderType::Rounded)
-        .border_style(Style::default().fg(theme::palette::RATATUI_CYAN))
-        .title(Line::from(vec![
-            Span::styled(" 🍑 ", theme::button_key_style()),
-            Span::styled(
-                "Aimee Codes",
-                Style::default()
-                    .fg(theme::palette::RATATUI_CYAN)
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Span::styled(" 🍑 ", theme::button_key_style()),
-        ]))
-        .title(
-            Line::from(format!(" v{VERSION} "))
-                .right_aligned()
-                .style(Style::default().fg(theme::palette::RATATUI_GOLD)),
-        )
-        .title_bottom(
-            Line::from(format!(
-                " {} agents · font: {} ",
-                CHIPS.len(),
-                theme::WARP_FONT_FACE
-            ))
-            .centered()
-            .style(
-                Style::default()
-                    .fg(theme::palette::RATATUI_VIOLET)
-                    .add_modifier(Modifier::BOLD),
-            ),
-        );
-    let inner = frame.inner(area);
-    frame.render(area, buf);
-
     let art_lines = BANNER
         .lines()
         .filter(|line| !line.trim().is_empty())
         .count() as u16;
+    let flock_rows = wrap_chips(area.width);
     let chunks = Layout::vertical([
         Constraint::Length(art_lines),
-        Constraint::Length(1),
-        Constraint::Length(1),
-        Constraint::Length(3), // agent chip rows
-        Constraint::Min(1),
+        Constraint::Length(1), // meta
+        Constraint::Length(flock_rows.len() as u16),
     ])
-    .split(inner);
+    .split(area);
 
     if !chunks.is_empty() {
         render_into(buf, chunks[0]);
     }
     if chunks.len() > 1 {
-        LineGauge::default()
-            .filled_symbol("━")
-            .unfilled_symbol("─")
-            .ratio(1.0)
-            .label(Line::from(Span::styled(
-                "LOOP ",
-                Style::default()
-                    .fg(theme::palette::RATATUI_LIME)
-                    .add_modifier(Modifier::BOLD),
-            )))
-            .filled_style(Style::default().fg(theme::palette::RATATUI_CYAN))
-            .unfilled_style(Style::default().fg(theme::palette::RATATUI_VIOLET))
-            .render(chunks[1], buf);
-    }
-    if chunks.len() > 2 {
-        let specialist_tab = format!("+{} specialists", CHIPS.len().saturating_sub(3));
-        Tabs::new([
-            ":sage research".to_string(),
-            ":muse plan".to_string(),
-            ":aimee implement".to_string(),
-            specialist_tab,
-        ])
-        .select(2)
-        .highlight_style(theme::button_key_style().bg(theme::palette::RATATUI_LIME))
-        .style(Style::default().fg(theme::palette::RATATUI_VIOLET))
-        .divider("·")
-        .render(chunks[2], buf);
-    }
-    if chunks.len() > 3 {
-        // Three rows of agent chips so the full flock is visible.
-        let chip_area = chunks[3];
-        let rows = Layout::vertical([
-            Constraint::Length(1),
-            Constraint::Length(1),
-            Constraint::Length(1),
-        ])
-        .split(chip_area);
-        let per_row = CHIPS.len().div_ceil(3);
-        for (row_idx, row) in rows.iter().enumerate() {
-            let start = row_idx * per_row;
-            let end = (start + per_row).min(CHIPS.len());
-            if start < end {
-                render_chips_slice(buf, row.x, row.y, row.width, &CHIPS[start..end], start);
-            }
-        }
-    }
-    if chunks.len() > 4 {
-        Paragraph::new(Line::from(Span::styled(
-            TAGLINE,
-            Style::default()
-                .fg(theme::palette::RATATUI_LIME)
-                .add_modifier(Modifier::BOLD),
-        )))
-        .render(chunks[4], buf);
-    }
-}
-
-/// Command cheatsheet under the splash, rendered as a ratatui table.
-fn print_command_sheet(cli_mode: bool) {
-    let rows: Vec<(&str, &str)> = if cli_mode {
-        vec![
-            ("/ or : then Tab", "command menu (all slash cmds)"),
-            (":new", "new conversation"),
-            (":info  :model  :provider", "session / model / provider"),
-            (":aimee :muse :sage", "loop roles"),
-            (":fe-* :be-* :plat-*", "15 specialist agents"),
-            (":tpl-*", "prompt templates"),
-            ("/review /incident /ship", "enterprise prompt packs"),
-        ]
-    } else {
-        vec![
-            ("/ or : then Tab", "open command palette"),
-            (":new  :info  :usage  :help", "get started"),
-            (":model  :provider", "model / provider"),
-            (":aimee :muse :sage", "loop · implement / plan / research"),
-            (":fe-ui :be-api :plat-k8s …", "full specialist flock"),
-            (":tpl-debug :tpl-handoff …", "prompt templates"),
-            ("/review /harden /ship /oncall", "enterprise commands"),
-            (":update  :exit", "self-update · quit (Ctrl+D)"),
-        ]
-    };
-    let height = (rows.len() as u16).saturating_add(2);
-    let width = 78u16;
-    let area = Rect::new(0, 0, width, height);
-    let mut buf = Buffer::empty(area);
-    Fill::new(" ")
-        .style(Style::default().bg(theme::palette::RATATUI_VOID))
-        .render(area, &mut buf);
-    let table_rows = rows.into_iter().map(|(cmd, hint)| {
-        Row::new([
-            Line::from(Span::styled(
-                cmd,
+        Paragraph::new(Line::from(vec![
+            Span::styled(
+                format!("v{VERSION}"),
                 Style::default()
                     .fg(theme::palette::RATATUI_GOLD)
                     .add_modifier(Modifier::BOLD),
-            )),
-            Line::from(Span::styled(
-                hint,
-                Style::default().fg(theme::palette::RATATUI_CYAN),
-            )),
-        ])
-    });
-    Table::new(table_rows, [Constraint::Length(28), Constraint::Min(20)])
-        .block(
-            Block::bordered()
-                .border_type(BorderType::Rounded)
-                .border_style(Style::default().fg(theme::palette::RATATUI_VIOLET))
-                .title(Line::from(Span::styled(
-                    " commands · Warp palette ",
-                    Style::default()
-                        .fg(theme::palette::RATATUI_GOLD)
-                        .add_modifier(Modifier::BOLD),
-                )))
-                .style(Style::default().bg(theme::palette::RATATUI_VOID)),
+            ),
+            Span::styled(
+                format!(
+                    " · {} agents · font: {}",
+                    CHIPS.len(),
+                    theme::WARP_FONT_FACE
+                ),
+                Style::default().fg(theme::palette::RATATUI_MUTED),
+            ),
+        ]))
+        .render(chunks[1], buf);
+    }
+    if chunks.len() > 2 {
+        let rows = Layout::vertical(
+            std::iter::repeat_n(Constraint::Length(1), flock_rows.len()).collect::<Vec<_>>(),
         )
-        .render(area, &mut buf);
-    print!("{}", buffer_to_ansi(&buf));
+        .split(chunks[2]);
+        let mut offset = 0;
+        for (row, chips) in rows.iter().zip(&flock_rows) {
+            let owned: Vec<(&str, &str)> = chips
+                .iter()
+                .map(|(k, l)| (k.as_str(), l.as_str()))
+                .collect();
+            render_chips_slice(buf, row.x, row.y, row.width, &owned, offset);
+            offset += chips.len();
+        }
+    }
+}
+
+/// Compact command hints printed under the splash.
+///
+/// Warp keeps help to a single dim line (`⌘ / for commands`); we match that
+/// with one quiet row instead of a framed table.
+fn print_command_sheet(_cli_mode: bool) {
+    let hint = format!(
+        "{} for commands · {} agents · {} for shell",
+        "/".truecolor(0xFF, 0xCC, 0x02),
+        ":".truecolor(0xFF, 0xCC, 0x02),
+        "!".truecolor(0xBF, 0x7A, 0xF0),
+    );
+    println!("{}", hint.dimmed());
     println!();
 }
 
@@ -436,30 +309,6 @@ pub fn render_into(buf: &mut Buffer, area: Rect) {
     }
 }
 
-/// Encourages users to use the zsh plugin for a better experience.
-fn display_zsh_encouragement() {
-    let tip = DisplayBox::new(vec![
-        format!(
-            "{} {}",
-            "TIP:".bold().truecolor(255, 210, 0),
-            "For the best experience, use our zsh plugin!".bold()
-        ),
-        format!(
-            "{} {} {}",
-            "·".dimmed(),
-            "Set up Aimee Codes via our zsh plugin:".dimmed(),
-            "aimee zsh setup".bold().truecolor(163, 255, 18),
-        ),
-        format!(
-            "{} {} {}",
-            "·".dimmed(),
-            "Learn more:".dimmed(),
-            "https://aimeecodes.dev/docs/zsh-support".truecolor(0, 229, 255)
-        ),
-    ]);
-    println!("{}", tip);
-}
-
 /// Invisible widget wrapper so the banner can sit on a ratatui surface.
 pub struct BannerWidget;
 
@@ -509,20 +358,23 @@ mod tests {
     }
 
     #[test]
-    fn test_render_splash_includes_tagline_and_aimee_chip() {
+    fn test_render_splash_quiet_landing() {
         let area = splash_area();
         let mut buf = Buffer::empty(area);
         render_splash(&mut buf, area);
         let actual = buffer_text(&buf);
-        assert!(actual.contains("CLI agent flock"));
-        assert!(actual.contains("Aimee Codes"));
-        assert!(actual.contains("🍑"));
-        assert!(actual.contains("LOOP"));
+        // Meta line + two flock rows; no frame chrome.
+        assert!(actual.contains("agents"));
+        assert!(actual.contains("JetBrains Mono"));
+        // Row 1 leads with the loop trio.
         assert!(actual.contains(":aimee"));
         assert!(actual.contains(":muse"));
         assert!(actual.contains(":sage"));
+        // Row 2 carries the tail of the flock (17 agents split across 2 rows).
+        assert!(actual.contains(":plat-sre") || actual.contains(":plat-cloud"));
         assert!(actual.contains(":fe-ui") || actual.contains("fe-ui"));
-        assert!(actual.contains("specialists") || actual.contains("agents"));
+        assert!(!actual.contains('╭'));
+        assert!(!actual.contains('╰'));
         assert_eq!(agent_chip_count(), 17);
     }
 
@@ -534,7 +386,6 @@ mod tests {
         let actual = buffer_to_ansi(&buf);
         assert!(actual.contains("\u{1b}[38;2;"));
         assert!(actual.contains(":aimee"));
-        assert!(actual.contains(TAGLINE));
     }
 
     #[test]
