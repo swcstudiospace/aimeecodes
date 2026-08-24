@@ -350,7 +350,7 @@ impl PromptUpgrade {
         xml.push_str(&indent(trimmed, 4));
         xml.push_str("\n  </intent>\n");
         xml.push_str(&uplift.render_xml());
-        if let Some(goal) = goal {
+        if let Some(goal) = goal.filter(|g| g.should_continue()) {
             xml.push_str("  <standing_goal>");
             xml.push_str(&escape_xml(&goal.goal));
             xml.push_str("</standing_goal>\n");

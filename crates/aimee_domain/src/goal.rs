@@ -3,6 +3,9 @@ use std::path::{Path, PathBuf};
 use derive_setters::Setters;
 use serde::{Deserialize, Serialize};
 
+/// No auto-pause. `/goal` loops until the judge or the user stops them.
+pub const UNLIMITED_TURNS: u32 = u32::MAX;
+
 /// Lifecycle of a standing `/goal` loop.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "snake_case")]
@@ -78,7 +81,7 @@ pub struct GoalState {
     pub status: GoalStatus,
     /// Turns consumed since the goal was set.
     pub turns_used: u32,
-    /// Soft budget before auto-pause.
+    /// Soft budget before auto-pause. `UNLIMITED_TURNS` never auto-pauses.
     pub max_turns: u32,
     /// Extra criteria appended via `/subgoal`.
     #[serde(default)]
@@ -110,7 +113,7 @@ impl GoalState {
             },
             status: GoalStatus::Active,
             turns_used: 0,
-            max_turns: 30,
+            max_turns: UNLIMITED_TURNS,
             subgoals: Vec::new(),
             contract,
             pod_id: None,
@@ -135,7 +138,7 @@ impl GoalState {
             return;
         }
         self.turns_used = self.turns_used.saturating_add(1);
-        if self.turns_used >= self.max_turns {
+        if self.max_turns != UNLIMITED_TURNS && self.turns_used >= self.max_turns {
             self.status = GoalStatus::Paused;
         }
     }
@@ -511,6 +514,19 @@ mod tests {
     }
 
     #[test]
+    fn test_goal_default_budget_is_unlimited() {
+        let fixture = GoalState::new("Ship");
+        let actual = (fixture.max_turns, fixture.status);
+        let expected = (UNLIMITED_TURNS, GoalStatus::Active);
+        assert_eq!(actual, expected);
+        let mut ticking = fixture;
+        ticking.tick();
+        ticking.tick();
+        assert_eq!(ticking.status, GoalStatus::Active);
+        assert_eq!(ticking.turns_used, 2);
+    }
+
+    #[test]
     fn test_goal_store_round_trip() {
         let path = std::env::temp_dir().join(format!(
             "aimee-goal-{}-{}.json",
@@ -562,7 +578,8 @@ mod tests {
     fn test_goal_legacy_json_defaults_pod_and_pr() {
         let fixture = r#"{"goal":"Ship","status":"active","turns_used":0,"max_turns":30}"#;
         let actual: GoalState = serde_json::from_str(fixture).unwrap();
-        let expected = GoalState::new("Ship");
+        let mut expected = GoalState::new("Ship");
+        expected.max_turns = 30;
         assert_eq!(actual, expected);
     }
 

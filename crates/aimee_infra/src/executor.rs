@@ -11,6 +11,46 @@ use tokio::sync::Mutex;
 
 use crate::console::StdConsoleWriter;
 
+const POD_WORKSPACE_ENV: &str = "AIMEE_POD_WORKSPACE";
+const POD_BIN_ENV: &str = "AIMEE_POD_BIN";
+
+fn attached_pod_workspace() -> Option<String> {
+    std::env::var(POD_WORKSPACE_ENV)
+        .ok()
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
+}
+
+fn prepare_pod_command(
+    workspace: &str,
+    command_str: &str,
+    env_vars: Option<Vec<String>>,
+) -> Command {
+    let bin = std::env::var(POD_BIN_ENV).unwrap_or_else(|_| "devpod".to_string());
+    let mut command = Command::new(bin);
+    command
+        .arg("ssh")
+        .arg(workspace)
+        .arg("--command")
+        .arg(command_str)
+        .env("CLICOLOR_FORCE", "1")
+        .env("FORCE_COLOR", "true")
+        .env_remove("NO_COLOR")
+        .kill_on_drop(true)
+        .stdin(std::process::Stdio::inherit())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped());
+    if let Some(env_vars) = env_vars {
+        for env_var in env_vars {
+            if let Ok(value) = std::env::var(&env_var) {
+                command.env(&env_var, value);
+            }
+        }
+    }
+    tracing::info!(command = command_str, workspace, "Executing command in pod");
+    command
+}
+
 /// Service for executing shell commands
 #[derive(Clone, Debug)]
 pub struct AimeeCommandExecutorService {
@@ -32,6 +72,9 @@ impl AimeeCommandExecutorService {
         working_dir: &Path,
         env_vars: Option<Vec<String>>,
     ) -> Command {
+        if let Some(workspace) = attached_pod_workspace() {
+            return prepare_pod_command(&workspace, command_str, env_vars);
+        }
         // Create a basic command
         let is_windows = cfg!(target_os = "windows");
         let shell = self.env.shell.as_str();
