@@ -152,10 +152,42 @@ impl AndaConnection {
             format!("inactive — KIP nexus unreachable at {}", self.nexus_url)
         };
         format!(
-            "Anda Engine: {engine}\nWorkspace {}: connecting over pod ssh…",
+            "Anda Engine: {engine}\nWorkspace {}: attaching Aimee TUI (shell runs in the pod)…",
             self.workspace
         )
     }
+}
+
+/// Prepares a local TUI attach to a workspace (no SSH; the pod has no
+/// `aimee` binary).
+///
+/// # Errors
+///
+/// Returns when the workspace is unknown or DevPod is missing.
+pub fn prepare_connect(workspace: &str) -> Result<AndaConnection> {
+    let connection = AndaConnection::probe(workspace);
+    let list = Command::new(binary())
+        .args(["list", "--output", "json"])
+        .output()
+        .context("failed to spawn devpod list")?;
+    if !list.status.success() {
+        bail!("devpod list failed");
+    }
+    #[derive(serde::Deserialize)]
+    struct Entry {
+        id: String,
+        #[serde(default)]
+        state: Option<String>,
+    }
+    let entries: Vec<Entry> = serde_json::from_slice(&list.stdout).unwrap_or_default();
+    let found = entries
+        .into_iter()
+        .find(|entry| entry.id == workspace)
+        .ok_or_else(|| anyhow::anyhow!("Unknown workspace '{workspace}'. Run `aimee pod list`."))?;
+    if found.state.as_deref().unwrap_or("") != "Running" {
+        provision_for_goal(workspace, ".")?;
+    }
+    Ok(connection)
 }
 
 /// Connects to a workspace via the Anda Engine bridge: probes the engine's
@@ -207,8 +239,8 @@ pub fn argv(command: &PodCommand) -> Option<Vec<String>> {
         PodCommand::Stop { args } => prepend("stop", args),
         PodCommand::Delete { args } => prepend("delete", args),
         PodCommand::Ssh { args } => prepend("ssh", args),
-        // Aimee-native: engine activity probe, then the ssh session below.
-        PodCommand::Connect { workspace } => prepend("ssh", std::slice::from_ref(workspace)),
+        // Aimee-native: attach the local TUI; never map to `devpod ssh`.
+        PodCommand::Connect { .. } => return None,
         PodCommand::Exec { workspace, command } => {
             vec![
                 "ssh".into(),
@@ -581,10 +613,10 @@ mod tests {
     }
 
     #[test]
-    fn test_argv_connect_maps_to_ssh() {
+    fn test_argv_connect_is_aimee_native() {
         let fixture = PodCommand::Connect { workspace: "aimee-ship".into() };
-        let actual = argv(&fixture).unwrap();
-        let expected = vec!["ssh".to_string(), "aimee-ship".into()];
+        let actual = argv(&fixture);
+        let expected = None;
         assert_eq!(actual, expected);
     }
 

@@ -210,7 +210,7 @@ pub enum PodCommand {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
         args: Vec<String>,
     },
-    /// Connect via the Anda Engine bridge (activity probe + pod ssh).
+    /// Attach this Aimee TUI to an existing workspace (does not SSH).
     Connect {
         /// Workspace id to connect to.
         workspace: String,

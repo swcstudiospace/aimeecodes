@@ -212,6 +212,24 @@ fn normalize_result_text(buffer: String) -> ReadResult {
 }
 
 fn render_prompt(prompt: &AimeePrompt) -> ResponsivePrompt {
+    render_prompt_with_width(prompt, measured_term_width())
+}
+
+/// Terminal width as seen by this process; `None` when stdout is not a TTY
+/// (tests, pipes) — callers treat that as "always fits".
+fn measured_term_width() -> Option<usize> {
+    crate::utils::terminal_columns()
+}
+
+/// Renders the two-part Warp prompt, dropping the right-aligned status
+/// segment whenever it cannot physically fit next to the input area.
+///
+/// The right segment is positioned with cursor save/forward/backward
+/// escapes; those clamp at the terminal margin, so on a narrow CLI (or
+/// after shrinking the window) the status would paint directly over the
+/// text being typed. Requiring [`RIGHT_PROMPT_MIN_INPUT_ROOM`] spare
+/// columns keeps the input area usable at every width.
+fn render_prompt_with_width(prompt: &AimeePrompt, term_width: Option<usize>) -> ResponsivePrompt {
     let left = prompt.render_prompt_left();
     let indicator = prompt.render_prompt_indicator();
     let right = prompt.render_prompt_right();
@@ -227,7 +245,7 @@ fn render_prompt(prompt: &AimeePrompt) -> ResponsivePrompt {
     // The right prompt is positioned off to the side with cursor save/restore
     // and is not part of the input-line geometry, so it is excluded from `raw`
     // entirely.
-    if right.trim().is_empty() {
+    if right.trim().is_empty() || !right_fits(&left, &indicator, right, term_width) {
         let styled = format!("{left}{indicator}");
         let raw = strip_ansi_codes(&styled).into_owned();
         return ResponsivePrompt { raw, styled };
@@ -245,6 +263,25 @@ fn render_prompt(prompt: &AimeePrompt) -> ResponsivePrompt {
     let right = render_right_prompt(right);
     let raw = strip_ansi_codes(&format!("{left}{indicator}")).into_owned();
     ResponsivePrompt { raw, styled: format!("{left}{right}{indicator}") }
+}
+
+/// Minimum columns of typing room kept between the left prompt and the
+/// right-aligned status segment before the status is suppressed.
+const RIGHT_PROMPT_MIN_INPUT_ROOM: usize = 20;
+
+/// Whether the right status segment fits beside the first prompt line with
+/// room to type. Unknown width (non-TTY) is treated as fitting to preserve
+/// piped-output behaviour.
+fn right_fits(left: &str, indicator: &str, right: &str, term_width: Option<usize>) -> bool {
+    let Some(cols) = term_width else {
+        return true;
+    };
+    // Only the first physical line hosts the right segment.
+    let first_line = left.split('\n').next().unwrap_or(left);
+    let left_width =
+        measure_text_width(strip_ansi_codes(format!("{first_line}{indicator}").as_str()).as_ref());
+    let right_width = measure_text_width(strip_ansi_codes(right).as_ref());
+    left_width + RIGHT_PROMPT_MIN_INPUT_ROOM + right_width <= cols
 }
 
 fn render_right_prompt(right: &str) -> String {
@@ -391,5 +428,53 @@ mod tests {
         );
         // The styled prompt, by contrast, does carry styling for display.
         assert!(rendered.styled.contains('\u{1b}'));
+    }
+
+    #[test]
+    fn test_right_prompt_suppressed_on_narrow_terminal() {
+        use std::path::PathBuf;
+
+        use aimee_api::{AgentId, ModelId};
+
+        // On a narrow CLI the right-aligned status cannot sit beside the
+        // input area; rendering it anyway paints it over the user's typing.
+        let mut prompt = AimeePrompt::new(PathBuf::from("project"), AgentId::default());
+        prompt.model(ModelId::new("anthropic/claude-opus-4"));
+
+        let actual = render_prompt_with_width(&prompt, Some(40));
+
+        assert!(
+            !actual.styled.contains("\u{1b}[s"),
+            "right prompt cursor-save escape must be absent on narrow terminals: {:?}",
+            actual.styled
+        );
+    }
+
+    #[test]
+    fn test_right_prompt_kept_on_wide_terminal() {
+        use std::path::PathBuf;
+
+        use aimee_api::{AgentId, ModelId};
+
+        let mut fixture = AimeePrompt::new(PathBuf::from("project"), AgentId::default());
+        let _ = fixture.model(ModelId::new("anthropic/claude-opus-4"));
+
+        let actual = render_prompt_with_width(&fixture, Some(120));
+
+        assert!(actual.styled.contains("\u{1b}[s"));
+    }
+
+    #[test]
+    fn test_right_prompt_kept_when_width_unknown() {
+        use std::path::PathBuf;
+
+        use aimee_api::{AgentId, ModelId};
+
+        let mut fixture = AimeePrompt::new(PathBuf::from("project"), AgentId::default());
+        let _ = fixture.model(ModelId::new("anthropic/claude-opus-4"));
+
+        let actual = render_prompt_with_width(&fixture, None);
+
+        assert!(actual.styled.contains("\u{1b}[s"));
     }
 }

@@ -1,9 +1,9 @@
 //! Aimee Codes TUI palette — **1:1 with Warp CLI dark theme**.
 //!
 //! Colors match Warp's shipped dark terminal theme (accent blue, mint green,
-//! soft white body on near-black). Font cannot be forced from the app; use
-//! **JetBrains Mono** (Warp's default monospaced face) in your terminal
-//! profile for a true 1:1 look.
+//! soft white body on near-black). Font cannot be forced from the app; set
+//! your terminal profile to **IBM Plex Mono** (the monospaced face used by
+//! os.swcstudio.space) for the house look.
 //!
 //! Shared by the rustyline prompt, title timeline, and ratatui banner.
 
@@ -45,9 +45,10 @@ pub mod palette {
     pub const RATATUI_NEAR_WHITE: RatatuiColor = RatatuiColor::Rgb(0xE6, 0xE6, 0xE6);
 }
 
-/// Recommended monospaced face (Warp default). Terminals must set this
-/// themselves — the CLI cannot load a font file into the host emulator.
-pub const WARP_FONT_FACE: &str = "JetBrains Mono";
+/// Recommended monospaced face (os.swcstudio.space house font). Terminals
+/// must set this themselves — the CLI cannot load a font file into the host
+/// emulator.
+pub const WARP_FONT_FACE: &str = "IBM Plex Mono";
 
 /// Inverted key chip used on splash tabs and footer buttons.
 pub fn button_key_style() -> ratatui::style::Style {
@@ -192,7 +193,7 @@ mod tests {
     }
 
     #[test]
-    fn test_warp_font_face_is_jetbrains_mono() {
-        assert_eq!(WARP_FONT_FACE, "JetBrains Mono");
+    fn test_warp_font_face_is_ibm_plex_mono() {
+        assert_eq!(WARP_FONT_FACE, "IBM Plex Mono");
     }
 }

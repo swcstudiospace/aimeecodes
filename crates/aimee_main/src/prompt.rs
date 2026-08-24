@@ -31,6 +31,10 @@ pub struct AimeePrompt {
     pub usage: Option<Usage>,
     pub agent_id: AgentId,
     pub model: Option<ModelId>,
+    /// Context window of the active model, in tokens. When both this and
+    /// `usage` are set, the right prompt renders a context-fill percentage
+    /// (Grok Build status-line pattern: pressure beats raw counts).
+    pub context_window: Option<u64>,
     /// Currently configured reasoning effort level for the active model,
     /// rendered to the right of the model when set. `Effort::None` is
     /// suppressed (see [`AimeePrompt::render_prompt_right`]).
@@ -48,6 +52,7 @@ impl AimeePrompt {
             usage: None,
             agent_id,
             model: None,
+            context_window: None,
             reasoning_effort: None,
             git_branch,
         }
@@ -153,6 +158,19 @@ impl AimeePrompt {
             .unwrap();
         }
 
+        // Context fill — borrowed from Grok Build's status-line contract: a
+        // fill percentage communicates context pressure better than raw
+        // counts. Color escalates as the window fills (muted → gold → red);
+        // hidden entirely until both usage and a known window exist.
+        if let Some(window) = self.context_window
+            && active
+            && let Some(tokens) = total_tokens
+        {
+            let percent = context_percent(*tokens, window);
+            let label = format!("ctx {percent}%");
+            write!(result, " {}", context_style(percent).paint(&label)).unwrap();
+        }
+
         // Cost (only shown when active)
         if let Some(cost) = self.usage.as_ref().and_then(|u| u.cost)
             && active
@@ -231,6 +249,25 @@ fn effort_label(effort: &Effort, width: usize) -> String {
     }
 }
 
+/// Context fill as a whole percentage, clamped to 0–100. Saturating math so
+/// an oversized count can never panic or wrap.
+fn context_percent(tokens: usize, window: u64) -> u8 {
+    let window = window.max(1) as usize;
+    (tokens.saturating_mul(100) / window).min(100) as u8
+}
+
+/// Color for the context-fill label: muted while there is room, Warp gold
+/// past 70% as a heads-up, red past 90% as pressure.
+fn context_style(percent: u8) -> Style {
+    if percent > 90 {
+        Style::new().bold().fg(Color::Red)
+    } else if percent > 70 {
+        Style::new().bold().fg(Color::Yellow)
+    } else {
+        Style::new().fg(Color::DarkGray)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use nu_ansi_term::Style;
@@ -245,6 +282,7 @@ mod tests {
                 usage: None,
                 agent_id: AgentId::default(),
                 model: None,
+                context_window: None,
                 reasoning_effort: None,
                 git_branch: None,
             }
@@ -447,5 +485,70 @@ mod tests {
             effort_label(&Effort::Medium, WIDE_TERMINAL_THRESHOLD),
             "MEDIUM"
         );
+    }
+
+    #[test]
+    fn test_render_prompt_right_with_context_meter() {
+        // Known window + usage → fill percentage between tokens and cost.
+        let usage = Usage {
+            total_tokens: aimee_api::TokenCount::Actual(2_000),
+            ..Default::default()
+        };
+        let mut prompt = AimeePrompt::default();
+        let _ = prompt.usage(usage);
+        prompt.context_window = Some(100_000);
+
+        let actual = prompt.render_prompt_right();
+        assert!(actual.contains("ctx 2%"));
+    }
+
+    #[test]
+    fn test_render_prompt_right_hides_context_without_window() {
+        // Usage without a known window → no ctx segment (no fake baseline).
+        let usage = Usage {
+            total_tokens: aimee_api::TokenCount::Actual(2_000),
+            ..Default::default()
+        };
+        let mut prompt = AimeePrompt::default();
+        let _ = prompt.usage(usage);
+
+        let actual = prompt.render_prompt_right();
+        assert!(!actual.contains("ctx "));
+    }
+
+    #[test]
+    fn test_render_prompt_right_hides_context_when_inactive() {
+        // Window known but zero tokens → inactive prompt stays dim and bare.
+        let mut prompt = AimeePrompt::default();
+        prompt.context_window = Some(100_000);
+
+        let actual = prompt.render_prompt_right();
+        assert!(!actual.contains("ctx "));
+    }
+
+    #[test]
+    fn test_context_percent_clamps() {
+        let actual = (
+            context_percent(0, 100_000),
+            context_percent(50_000, 100_000),
+            context_percent(200_000, 100_000),
+            context_percent(1_000, 0), // degenerate window must not divide by zero
+        );
+        let expected = (0u8, 50u8, 100u8, 100u8);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_context_style_escalates() {
+        // The three bands must render as three distinct styles, escalating to
+        // bold at the warn and pressure thresholds (calm stays plain).
+        let calm = context_style(10);
+        let warm = context_style(75);
+        let hot = context_style(95);
+        assert_ne!(format!("{warm:?}"), format!("{calm:?}"));
+        assert_ne!(format!("{hot:?}"), format!("{warm:?}"));
+        assert!(format!("{warm:?}").contains("bold"));
+        assert!(format!("{hot:?}").contains("bold"));
+        assert!(!format!("{calm:?}").contains("bold"));
     }
 }

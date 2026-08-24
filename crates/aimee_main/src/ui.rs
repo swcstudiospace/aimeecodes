@@ -321,6 +321,21 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
             .get_agent_model(self.api.get_active_agent().await)
             .await;
         let reasoning_effort = self.api.get_reasoning_effort().await.ok().flatten();
+        let context_window = match model.as_ref() {
+            Some(m) => self
+                .api
+                .get_all_provider_models()
+                .await
+                .ok()
+                .and_then(|providers| {
+                    providers
+                        .into_iter()
+                        .flat_map(|p| p.models)
+                        .find(|candidate| &candidate.id == m)
+                        .and_then(|found| found.context_length)
+                }),
+            None => None,
+        };
         let mut aimee_prompt = AimeePrompt::new(self.state.cwd.clone(), agent_id);
         if let Some(u) = usage {
             aimee_prompt.usage(u);
@@ -328,6 +343,7 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
         if let Some(m) = model {
             aimee_prompt.model(m);
         }
+        aimee_prompt.context_window = context_window;
         if let Some(e) = reasoning_effort {
             aimee_prompt.reasoning_effort(e);
         }
@@ -4996,14 +5012,20 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
     }
 
     async fn maybe_continue_goal(&mut self) -> anyhow::Result<()> {
-        if let Some(reply) = self.last_assistant_text().await
-            && let Some(verdict) = self.state.goal.judge(&reply)?
+        let reply = self.last_assistant_text().await.unwrap_or_default();
+        if let Some(verdict) = self.state.goal.judge(&reply)?
             && verdict.complete
         {
             self.writeln_title(TitleFormat::info(format!(
                 "/goal complete — {}",
                 verdict.reason
             )))?;
+            return Ok(());
+        }
+        if reply.trim().is_empty() {
+            self.writeln_title(TitleFormat::info(
+                "/goal: last turn produced no output — not auto-continuing",
+            ))?;
             return Ok(());
         }
         let _ = self.state.goal.tick();
@@ -5016,9 +5038,12 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
             .current()
             .map(|g| (g.turns_used, g.max_turns))
             .unwrap_or((0, 0));
-        self.writeln_title(TitleFormat::info(format!(
-            "Continuing /goal ({used}/{max})"
-        )))?;
+        let progress = if max == aimee_domain::UNLIMITED_TURNS {
+            format!("turn {used}")
+        } else {
+            format!("{used}/{max}")
+        };
+        self.writeln_title(TitleFormat::info(format!("Continuing /goal ({progress})")))?;
         self.spinner.start(None)?;
         Box::pin(self.on_message(Some(prompt))).await?;
         Ok(())

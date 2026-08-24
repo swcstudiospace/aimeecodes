@@ -33,6 +33,26 @@ pub fn humanize_number(n: usize) -> String {
     }
 }
 
+/// Terminal width probe that tolerates ptys reporting zero rows.
+///
+/// `terminal_size` returns `None` when either winsize dimension is 0, which
+/// happens on `script`-style ptys, some CI runners, and freshly attached
+/// tmux panes — the CLI then silently renders at the 80-column fallback
+/// regardless of the real width. This probes stdout first (the surface the
+/// UI paints on), then stderr (where the spinner draws), accepting a size
+/// whose column count is positive even when rows is 0.
+pub fn terminal_columns() -> Option<usize> {
+    for fd in [libc::STDOUT_FILENO, libc::STDERR_FILENO] {
+        let mut winsize = libc::winsize { ws_row: 0, ws_col: 0, ws_xpixel: 0, ws_ypixel: 0 };
+        // SAFETY: `winsize` is a plain POD struct valid for the duration of
+        // the call; TIOCGWINSZ only writes into it.
+        if unsafe { libc::ioctl(fd, libc::TIOCGWINSZ, &mut winsize) } == 0 && winsize.ws_col > 0 {
+            return Some(winsize.ws_col as usize);
+        }
+    }
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;

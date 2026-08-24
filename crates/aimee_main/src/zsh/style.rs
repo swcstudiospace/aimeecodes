@@ -22,6 +22,8 @@ impl ZshColor {
     pub const GREEN: Self = Self(2);
     /// Yellow (color 3)
     pub const YELLOW: Self = Self(3);
+    /// Red (color 1)
+    pub const RED: Self = Self(1);
     /// Dimmed gray (color 240)
     pub const DIMMED: Self = Self(240);
 

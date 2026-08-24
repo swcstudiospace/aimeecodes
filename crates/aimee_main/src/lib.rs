@@ -31,7 +31,8 @@ mod update;
 
 use std::sync::LazyLock;
 
-pub use cli::{Cli, ListCommand, ListCommandGroup, TopLevelCommand};
+pub use cli::{Cli, ListCommand, ListCommandGroup, PodCommand, PodCommandGroup, TopLevelCommand};
+pub use pod::prepare_connect;
 pub use pod::provision_for_goal;
 pub use sandbox::Sandbox;
 pub use title_display::*;

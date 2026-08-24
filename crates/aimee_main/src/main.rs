@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use aimee_api::AimeeAPI;
 use aimee_config::AimeeConfig;
 use aimee_domain::TitleFormat;
-use aimee_main::{Cli, Sandbox, TitleDisplayExt, TopLevelCommand, UI, tracker};
+use aimee_main::{Cli, PodCommand, Sandbox, TitleDisplayExt, TopLevelCommand, UI, tracker};
 use anyhow::{Context, Result};
 use clap::Parser;
 
@@ -93,6 +93,7 @@ fn dirs_next_home() -> Option<PathBuf> {
 
 async fn run() -> Result<()> {
     // Enable ANSI escape code support on Windows console.
+    //
     // `enable_ansi_support` sets VT processing on the `CONOUT$` screen buffer
     // handle. We additionally set it on `STD_OUTPUT_HANDLE` directly, since
     // console mode flags are per-handle and `CONOUT$` may not propagate to
@@ -144,7 +145,7 @@ async fn run() -> Result<()> {
         AimeeConfig::read().context("Failed to read Aimee configuration from .aimee.toml")?;
 
     // Handle worktree creation if specified
-    let cwd: PathBuf = match (&cli.sandbox, &cli.directory) {
+    let mut cwd: PathBuf = match (&cli.sandbox, &cli.directory) {
         (Some(sandbox), Some(cli)) => {
             let mut sandbox = Sandbox::new(sandbox).create()?;
             sandbox.push(cli);
@@ -157,6 +158,35 @@ async fn run() -> Result<()> {
         },
         (_, _) => std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")),
     };
+
+    // `aimee pod connect <id>` attaches the *local* TUI to an existing
+    // workspace. Do not SSH in (the pod has no `aimee` binary); instead run
+    // the session against the workspace's host folder so file tools see the
+    // same files as the pod.
+    if let Some(TopLevelCommand::Pod(group)) = cli.subcommands.clone()
+        && let PodCommand::Connect { workspace } = group.command
+    {
+        let attach = aimee_main::prepare_connect(&workspace)?;
+        println!("{}", attach.render());
+        if let Ok(json) = std::process::Command::new("devpod")
+            .args(["list", "--output", "json"])
+            .output()
+            && json.status.success()
+            && let Ok(entries) = serde_json::from_slice::<serde_json::Value>(&json.stdout)
+            && let Some(folder) = entries
+                .as_array()
+                .and_then(|list| {
+                    list.iter().find(|entry| {
+                        entry.get("id").and_then(|v| v.as_str()) == Some(workspace.as_str())
+                    })
+                })
+                .and_then(|entry| entry.pointer("/source/localFolder"))
+                .and_then(|value| value.as_str())
+        {
+            cwd = PathBuf::from(folder);
+        }
+        cli.subcommands = None;
+    }
 
     if let Some(pod_id) = cli.pod.as_deref() {
         let source = cwd.to_str().unwrap_or(".");

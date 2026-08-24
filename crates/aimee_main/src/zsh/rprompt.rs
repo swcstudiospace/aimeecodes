@@ -35,6 +35,10 @@ pub struct ZshRPrompt {
     model: Option<ModelId>,
     token_count: Option<TokenCount>,
     cost: Option<f64>,
+    /// Context window of the active model, in tokens. When set together with
+    /// `token_count`, the prompt renders a context-fill percentage (mirrors
+    /// [`crate::prompt::AimeePrompt`], Grok Build status-line pattern).
+    context_window: Option<u64>,
     /// Currently configured reasoning effort level for the active model.
     /// Rendered to the right of the model when set.
     reasoning_effort: Option<Effort>,
@@ -64,6 +68,14 @@ impl ZshRPrompt {
     }
 }
 
+/// Context fill as a whole percentage, clamped to 0–100. Saturating math so
+/// an oversized count can never panic or wrap. Mirrors
+/// `crate::prompt::context_percent`.
+fn context_percent(tokens: usize, window: u64) -> u8 {
+    let window = window.max(1) as usize;
+    (tokens.saturating_mul(100) / window).min(100) as u8
+}
+
 impl Default for ZshRPrompt {
     fn default() -> Self {
         Self {
@@ -71,6 +83,7 @@ impl Default for ZshRPrompt {
             model: None,
             token_count: None,
             cost: None,
+            context_window: None,
             reasoning_effort: None,
             terminal_width: None,
             use_nerd_font: true,
@@ -127,6 +140,22 @@ impl Display for ZshRPrompt {
             if active {
                 write!(f, " {}{}", prefix, num.zsh().fg(ZshColor::WHITE).bold())?;
             }
+        }
+
+        // Add context fill (mirrors the CLI prompt: muted → yellow → red as
+        // the window fills; hidden without a known window or when inactive).
+        if let Some(window) = self.context_window
+            && active
+            && let Some(count) = self.token_count
+        {
+            let percent = context_percent(*count, window);
+            let label = format!("ctx {percent}%");
+            let color = match percent {
+                91..=100 => ZshColor::RED,
+                71..=90 => ZshColor::YELLOW,
+                _ => ZshColor::DIMMED,
+            };
+            write!(f, " {}", label.zsh().fg(color).bold())?;
         }
 
         // Add cost
@@ -435,6 +464,66 @@ mod tests {
 
         let expected =
             " %B%F{15}\u{f167a} AIMEE%f%b %B%F{15}1.5k%f%b %F{134}\u{ec19} gpt-4%f %F{3}MIN%f";
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_rprompt_context_meter_active() {
+        // Known window + tokens → ctx percentage between token count and cost.
+        let actual = ZshRPrompt::default()
+            .agent(Some(AgentId::new("aimee")))
+            .model(Some(ModelId::new("gpt-4")))
+            .token_count(Some(TokenCount::Actual(2_000)))
+            .context_window(Some(100_000))
+            .to_string();
+
+        let expected = " %B%F{15}\u{f167a} AIMEE%f%b %B%F{15}2.0k%f%b %B%F{240}ctx 2%%f%b %F{134}\u{ec19} gpt-4%f";
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_rprompt_context_hidden_without_window_or_inactive() {
+        // No window set → no segment even with tokens.
+        let no_window = ZshRPrompt::default()
+            .token_count(Some(TokenCount::Actual(2_000)))
+            .to_string();
+        assert!(!no_window.contains("ctx "));
+
+        // Window set but zero tokens (inactive) → still hidden.
+        let inactive = ZshRPrompt::default().context_window(Some(100_000)).to_string();
+        assert!(!inactive.contains("ctx "));
+    }
+
+    #[test]
+    fn test_rprompt_context_color_escelation() {
+        // Calm (<71%) renders dimmed; warn band bold yellow; pressure band red.
+        let calm = ZshRPrompt::default()
+            .token_count(Some(TokenCount::Actual(50_000)))
+            .context_window(Some(100_000))
+            .to_string();
+        assert!(calm.contains("%B%F{240}ctx 50%%f%b"));
+
+        let warm = ZshRPrompt::default()
+            .token_count(Some(TokenCount::Actual(80_000)))
+            .context_window(Some(100_000))
+            .to_string();
+        assert!(warm.contains("%B%F{3}ctx 80%%f%b"));
+
+        let hot = ZshRPrompt::default()
+            .token_count(Some(TokenCount::Actual(95_000)))
+            .context_window(Some(100_000))
+            .to_string();
+        assert!(hot.contains("%B%F{1}ctx 95%%f%b"));
+    }
+
+    #[test]
+    fn test_context_percent_clamps() {
+        let actual = (
+            context_percent(0, 100_000),
+            context_percent(200_000, 100_000),
+            context_percent(1_000, 0), // degenerate window must not divide by zero
+        );
+        let expected = (0u8, 100u8, 100u8);
         assert_eq!(actual, expected);
     }
 }

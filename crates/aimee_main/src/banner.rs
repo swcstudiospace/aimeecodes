@@ -80,20 +80,43 @@ fn print_ratatui_splash() {
 }
 
 /// Area for the quiet landing: art + meta line + width-wrapped flock rows.
+///
+/// Width is clamped to the real terminal so the ANSI never exceeds one
+/// physical line (a wider buffer wraps mid-chip on narrow CLIs and garbles
+/// the landing). Height follows the wrapped row count instead of a constant.
 fn splash_area() -> Rect {
     let art_width = BANNER
         .lines()
         .map(|line| line.chars().count() as u16)
         .max()
         .unwrap_or(60);
-    let width = art_width.max(78).saturating_add(4);
+    let width = art_width
+        .max(78)
+        .saturating_add(4)
+        .min(terminal_width().max(MIN_SPLASH_WIDTH));
     let art_lines = BANNER
         .lines()
         .filter(|line| !line.trim().is_empty())
         .count() as u16;
-    // art + meta + up to 5 flock rows (17 agents greedily wrap at ~82 cols).
-    Rect::new(0, 0, width, art_lines.saturating_add(6))
+    let flock_rows = wrap_chips(width).len() as u16;
+    // art + meta + however many flock rows actually fit the clamped width.
+    Rect::new(
+        0,
+        0,
+        width,
+        art_lines.saturating_add(1).saturating_add(flock_rows),
+    )
 }
+
+/// Real terminal width in columns; falls back to 80 when stdout is not a
+/// TTY (piped output, tests). Tolerates ptys that report zero rows.
+fn terminal_width() -> u16 {
+    crate::utils::terminal_columns().unwrap_or(80) as u16
+}
+
+/// Never go below this or the meta/flock layout degenerates; terminals
+/// narrower than the art simply clip the right edge of each line.
+const MIN_SPLASH_WIDTH: u16 = 34;
 
 /// Splits chips into rows that fit `width` columns, honoring each chip's
 /// rendered size (` key `, ` label `, 2-col gap).
@@ -139,7 +162,10 @@ pub fn render_splash(buf: &mut Buffer, area: Rect) {
         render_into(buf, chunks[0]);
     }
     if chunks.len() > 1 {
-        Paragraph::new(Line::from(vec![
+        // Drop the font segment before the meta line would clip mid-word on
+        // clamped narrow widths — a truncated `font: IBM Plex M` looks
+        // broken; a shorter line just looks quiet.
+        let mut meta_spans = vec![
             Span::styled(
                 format!("v{VERSION}"),
                 Style::default()
@@ -147,15 +173,21 @@ pub fn render_splash(buf: &mut Buffer, area: Rect) {
                     .add_modifier(Modifier::BOLD),
             ),
             Span::styled(
-                format!(
-                    " · {} agents · font: {}",
-                    CHIPS.len(),
-                    theme::WARP_FONT_FACE
-                ),
+                format!(" · {} agents", CHIPS.len()),
                 Style::default().fg(theme::palette::RATATUI_MUTED),
             ),
-        ]))
-        .render(chunks[1], buf);
+        ];
+        let font_segment = format!(" · font: {}", theme::WARP_FONT_FACE);
+        // Exact painted lengths: version span + agents segment + separator.
+        let used = format!("v{VERSION}").chars().count()
+            + format!(" · {} agents", CHIPS.len()).chars().count();
+        if used + font_segment.chars().count() <= area.width as usize {
+            meta_spans.push(Span::styled(
+                font_segment,
+                Style::default().fg(theme::palette::RATATUI_MUTED),
+            ));
+        }
+        Paragraph::new(Line::from(meta_spans)).render(chunks[1], buf);
     }
     if chunks.len() > 2 {
         let rows = Layout::vertical(
@@ -233,23 +265,46 @@ fn render_chips_slice(
 /// Single-line ANSI chip row for the interactive rustyline prompt.
 ///
 /// Shows the loop trio plus a flock count so the prompt stays Warp-compact.
+/// The full row paints ~89 columns; on terminals narrower than that it swaps
+/// to a compact tail (`+N more` without the command hint) so the row never
+/// exceeds one physical line — a wrapping chip row corrupts rustyline's
+/// redraw region on every keystroke.
 ///
 /// # Returns
 ///
 /// Truecolor ANSI without a trailing newline.
 pub fn chips_ansi() -> String {
-    let width = 90u16;
-    let area = Rect::new(0, 0, width, 1);
-    let mut buf = Buffer::empty(area);
-    // Loop agents always visible on the prompt; full flock is on the splash.
-    const PROMPT_CHIPS: &[(&str, &str)] = &[
+    const FULL: &[(&str, &str)] = &[
         (":aimee", "implement"),
         (":muse", "plan"),
         (":sage", "research"),
         (":fe|be|plat", "+15 more · / for cmds"),
     ];
-    render_chips_slice(&mut buf, 0, 0, width, PROMPT_CHIPS, 0);
+    const COMPACT: &[(&str, &str)] = &[
+        (":aimee", "implement"),
+        (":muse", "plan"),
+        (":sage", "research"),
+        (":fe|be|plat", "+15 more"),
+    ];
+    let width = terminal_width().max(MIN_SPLASH_WIDTH);
+    let chips = if chips_row_width(FULL) <= width as usize {
+        FULL
+    } else {
+        COMPACT
+    };
+    let area = Rect::new(0, 0, width, 1);
+    let mut buf = Buffer::empty(area);
+    render_chips_slice(&mut buf, 0, 0, width, chips, 0);
     buffer_to_ansi(&buf).trim_end().to_string()
+}
+
+/// Painted width of a chip row as laid out by [`render_chips_slice`]:
+/// ` key ` + ` label  ` per chip.
+fn chips_row_width(chips: &[(&str, &str)]) -> usize {
+    chips
+        .iter()
+        .map(|(key, label)| key.chars().count() + 2 + label.chars().count() + 3)
+        .sum()
 }
 
 /// Converts a ratatui buffer into ANSI text for inline (non-alternate-screen)
@@ -374,7 +429,7 @@ mod tests {
         let actual = buffer_text(&buf);
         // Meta line + two flock rows; no frame chrome.
         assert!(actual.contains("agents"));
-        assert!(actual.contains("JetBrains Mono"));
+        assert!(actual.contains("IBM Plex Mono"));
         // Row 1 leads with the loop trio.
         assert!(actual.contains(":aimee"));
         assert!(actual.contains(":muse"));
