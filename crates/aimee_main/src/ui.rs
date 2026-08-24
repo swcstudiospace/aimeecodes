@@ -4163,18 +4163,47 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
         }
     }
 
+    /// True when workspace indexing is disabled via configuration. An empty
+    /// `services_url` opts the workspace out entirely: no auth attempt, no
+    /// network dials, no warnings.
+    fn indexing_disabled(&self) -> bool {
+        indexing_disabled(&self.config.services_url)
+    }
+
     /// Creates AimeeCodes Services credentials if not already authenticated and
     /// displays the credentials file location to the user.
     async fn init_aimee_services(&mut self) -> Result<()> {
-        if let Err(error) = self.api.create_auth_credentials().await {
-            // The indexing service is optional: an unreachable endpoint (e.g.
-            // offline, DNS failure) must degrade to a warning, not abort the
-            // session or provider setup.
-            self.writeln_title(TitleFormat::warning(format!(
-                "AimeeCodes Services unavailable — continuing without indexing ({})",
-                error
-            )))?;
+        if self.indexing_disabled() {
+            self.writeln_title(TitleFormat::info(
+                "Workspace indexing disabled — services_url is not configured",
+            ))?;
             return Ok(());
+        }
+        // Bound the attempt so a slow or blackholed endpoint can never stall
+        // startup or a turn on the indexing service, which is optional.
+        match tokio::time::timeout(
+            std::time::Duration::from_secs(5),
+            self.api.create_auth_credentials(),
+        )
+        .await
+        {
+            Err(_) => {
+                self.writeln_title(TitleFormat::warning(
+                    "AimeeCodes Services timed out after 5s — continuing without indexing",
+                ))?;
+                return Ok(());
+            }
+            Ok(Err(error)) => {
+                // The indexing service is optional: an unreachable endpoint
+                // (e.g. offline) must degrade to a warning, not abort the
+                // session or provider setup.
+                self.writeln_title(TitleFormat::warning(format!(
+                    "AimeeCodes Services unavailable — continuing without indexing ({})",
+                    error
+                )))?;
+                return Ok(());
+            }
+            Ok(Ok(_auth)) => {}
         }
         let env = self.api.environment();
         let credentials_path = crate::info::format_path_for_display(&env, &env.credentials_path());
@@ -5578,6 +5607,13 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
         use aimee_domain::SyncProgress;
         use aimee_spinner::ProgressBarManager;
 
+        if self.indexing_disabled() {
+            self.writeln_title(TitleFormat::info(
+                "Workspace indexing is disabled — set services_url in your .aimee.toml to enable it",
+            ))?;
+            return Ok(());
+        }
+
         // Check if auth already exists and create if needed
         if !self.api.is_authenticated().await? {
             self.init_aimee_services().await?;
@@ -5954,6 +5990,13 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
         path: std::path::PathBuf,
         yes: bool,
     ) -> anyhow::Result<()> {
+        if self.indexing_disabled() {
+            self.writeln_title(TitleFormat::info(
+                "Workspace indexing is disabled — set services_url in your .aimee.toml to enable it",
+            ))?;
+            return Ok(());
+        }
+
         // Ask for user consent before syncing and sharing directory contents
         // with the AimeeCodes Service.
         let display_path = path.display().to_string();
@@ -6032,10 +6075,31 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
     }
 }
 
+/// True when workspace indexing is opted out of via an empty `services_url`.
+fn indexing_disabled(services_url: &str) -> bool {
+    services_url.trim().is_empty()
+}
+
 #[cfg(test)]
 mod tests {
     // Note: Tests for confirm_delete_conversation are disabled because
     // AimeeSelect::confirm is not easily mockable in the current
     // architecture. The functionality is tested through integration tests
     // instead.
+
+    use super::indexing_disabled;
+
+    #[test]
+    fn test_indexing_disabled_on_empty_or_blank_services_url() {
+        let actual = (indexing_disabled(""), indexing_disabled("   "));
+        let expected = (true, true);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_indexing_enabled_with_configured_services_url() {
+        let actual = indexing_disabled("https://api.aimeecodes.dev/api");
+        let expected = false;
+        assert_eq!(actual, expected);
+    }
 }
