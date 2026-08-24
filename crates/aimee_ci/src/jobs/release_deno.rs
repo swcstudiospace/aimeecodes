@@ -17,8 +17,7 @@ pub fn release_deno_job() -> Job {
                 .run("cd deno-aimee-codes && ./update-deno.sh ${{ github.event.release.tag_name }}")
                 .add_env(("AUTO_PUSH", "true"))
                 .add_env(("CI", "true"))
-                .add_env(("JSR_TOKEN", "${{ secrets.JSR_TOKEN }}"))
-                .add_env(("NPM_TOKEN", "${{ secrets.NPM_TOKEN }}")),
+                .add_env(("JSR_TOKEN", "${{ secrets.JSR_TOKEN }}")),
         )
 }
 
