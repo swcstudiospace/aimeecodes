@@ -28,6 +28,12 @@ impl AimeeGrpcClient {
     /// Channels are cheap to clone and can be shared across multiple clients.
     /// The channel is created on first call and cached for subsequent calls.
     pub fn channel(&self) -> anyhow::Result<Channel> {
+        if self.server_url.trim().is_empty() {
+            anyhow::bail!(
+                "Workspace indexing is disabled — set services_url in your .aimee.toml to enable it"
+            );
+        }
+
         let mut guard = self.channel.lock().unwrap();
 
         if let Some(channel) = guard.as_ref() {
@@ -35,7 +41,9 @@ impl AimeeGrpcClient {
         }
 
         let mut channel = Channel::from_shared(self.server_url.to_string())
-            .expect("Invalid server URL")
+            .map_err(|error| {
+                anyhow::anyhow!("Invalid services_url '{}': {}", self.server_url, error)
+            })?
             .concurrency_limit(256);
 
         // Enable TLS for https URLs (webpki-roots is faster than native-roots)
@@ -59,5 +67,44 @@ impl AimeeGrpcClient {
     pub fn hydrate(&self) {
         let mut guard = self.channel.lock().unwrap();
         *guard = None;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use pretty_assertions::assert_eq;
+
+    use super::*;
+
+    #[test]
+    fn test_channel_errs_on_empty_server_url() {
+        let fixture = AimeeGrpcClient::new(String::new());
+        let actual = fixture.channel().expect_err("channel should fail");
+        let expected_message =
+            "Workspace indexing is disabled — set services_url in your .aimee.toml to enable it";
+        assert_eq!(actual.to_string(), expected_message);
+    }
+
+    #[test]
+    fn test_channel_errs_on_whitespace_server_url() {
+        let fixture = AimeeGrpcClient::new("   ".to_string());
+        let actual = fixture.channel();
+        assert!(actual.is_err());
+    }
+
+    #[test]
+    fn test_channel_errs_without_panic_on_malformed_url() {
+        let fixture = AimeeGrpcClient::new("::// not a uri".to_string());
+        let actual = fixture.channel().expect_err("channel should fail");
+        assert!(actual.to_string().contains("Invalid services_url"));
+    }
+
+    #[tokio::test]
+    async fn test_channel_succeeds_for_well_formed_url() {
+        // connect_lazy() never dials the network, so constructing a channel
+        // for a well-formed URL is cheap and side-effect free.
+        let fixture = AimeeGrpcClient::new("http://api.example.com".to_string());
+        let actual = fixture.channel();
+        assert!(actual.is_ok());
     }
 }

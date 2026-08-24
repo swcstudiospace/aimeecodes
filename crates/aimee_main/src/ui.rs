@@ -773,6 +773,12 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
                         starts_with,
                         ends_with,
                     } => {
+                        if self.indexing_disabled() {
+                            self.writeln_title(TitleFormat::info(
+                                "Workspace indexing is disabled — set services_url in your .aimee.toml to enable it",
+                            ))?;
+                            return Ok(());
+                        }
                         let mut params =
                             aimee_domain::SearchParams::new(&query, &use_case).limit(limit);
                         if let Some(k) = top_k {
