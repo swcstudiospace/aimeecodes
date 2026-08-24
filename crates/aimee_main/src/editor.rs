@@ -224,11 +224,11 @@ fn measured_term_width() -> Option<usize> {
 /// Renders the two-part Warp prompt, dropping the right-aligned status
 /// segment whenever it cannot physically fit next to the input area.
 ///
-/// The right segment is positioned with cursor save/forward/backward
-/// escapes; those clamp at the terminal margin, so on a narrow CLI (or
-/// after shrinking the window) the status would paint directly over the
-/// text being typed. Requiring [`RIGHT_PROMPT_MIN_INPUT_ROOM`] spare
-/// columns keeps the input area usable at every width.
+/// The right segment is positioned with relative cursor moves; those clamp
+/// at the terminal margin, so on a narrow CLI (or after shrinking the
+/// window) the status would paint directly over the text being typed.
+/// Requiring [`RIGHT_PROMPT_MIN_INPUT_ROOM`] spare columns keeps the input
+/// area usable at every width.
 fn render_prompt_with_width(prompt: &AimeePrompt, term_width: Option<usize>) -> ResponsivePrompt {
     let left = prompt.render_prompt_left();
     let indicator = prompt.render_prompt_indicator();
@@ -242,27 +242,52 @@ fn render_prompt_with_width(prompt: &AimeePrompt, term_width: Option<usize>) -> 
     // them), so any styling left in `raw` is counted as visible width and
     // pushes the cursor past where the text actually is. The left prompt and
     // indicator are styled via `nu_ansi_term`, so strip those codes for `raw`.
-    // The right prompt is positioned off to the side with cursor save/restore
-    // and is not part of the input-line geometry, so it is excluded from `raw`
+    // The right prompt is positioned off to the side with cursor moves and is
+    // not part of the input-line geometry, so it is excluded from `raw`
     // entirely.
-    if right.trim().is_empty() || !right_fits(&left, &indicator, right, term_width) {
+    if right.trim().is_empty() {
+        let styled = format!("{left}{indicator}");
+        let raw = strip_ansi_codes(&styled).into_owned();
+        return ResponsivePrompt { raw, styled };
+    }
+
+    let Some(cols) = term_width else {
+        // Without a measurable width the cursor-move geometry below cannot
+        // be trusted — and raw escape sequences must never leak into piped
+        // output. Render left-only.
+        let styled = format!("{left}{indicator}");
+        let raw = strip_ansi_codes(&styled).into_owned();
+        return ResponsivePrompt { raw, styled };
+    };
+
+    if !right_fits(&left, &indicator, right, cols) {
         let styled = format!("{left}{indicator}");
         let raw = strip_ansi_codes(&styled).into_owned();
         return ResponsivePrompt { raw, styled };
     }
 
     if let Some((first_line, remaining)) = left.split_once('\n') {
-        let right = render_right_prompt(right);
+        let first_width = visible_width(first_line);
+        let Some(right_rendered) = render_right_prompt(right, first_width, cols) else {
+            let styled = format!("{left}{indicator}");
+            let raw = strip_ansi_codes(&styled).into_owned();
+            return ResponsivePrompt { raw, styled };
+        };
         let raw = strip_ansi_codes(&format!("{first_line}\n{remaining}{indicator}")).into_owned();
         return ResponsivePrompt {
             raw,
-            styled: format!("{first_line}{right}\n{remaining}{indicator}"),
+            styled: format!("{first_line}{right_rendered}\n{remaining}{indicator}"),
         };
     }
 
-    let right = render_right_prompt(right);
+    let input_cols = visible_width(&format!("{left}{indicator}"));
+    let Some(right_rendered) = render_right_prompt(right, input_cols, cols) else {
+        let styled = format!("{left}{indicator}");
+        let raw = strip_ansi_codes(&styled).into_owned();
+        return ResponsivePrompt { raw, styled };
+    };
     let raw = strip_ansi_codes(&format!("{left}{indicator}")).into_owned();
-    ResponsivePrompt { raw, styled: format!("{left}{right}{indicator}") }
+    ResponsivePrompt { raw, styled: format!("{left}{right_rendered}{indicator}") }
 }
 
 /// Minimum columns of typing room kept between the left prompt and the
@@ -270,23 +295,39 @@ fn render_prompt_with_width(prompt: &AimeePrompt, term_width: Option<usize>) -> 
 const RIGHT_PROMPT_MIN_INPUT_ROOM: usize = 20;
 
 /// Whether the right status segment fits beside the first prompt line with
-/// room to type. Unknown width (non-TTY) is treated as fitting to preserve
-/// piped-output behaviour.
-fn right_fits(left: &str, indicator: &str, right: &str, term_width: Option<usize>) -> bool {
-    let Some(cols) = term_width else {
-        return true;
-    };
+/// room to type.
+fn right_fits(left: &str, indicator: &str, right: &str, cols: usize) -> bool {
     // Only the first physical line hosts the right segment.
     let first_line = left.split('\n').next().unwrap_or(left);
-    let left_width =
-        measure_text_width(strip_ansi_codes(format!("{first_line}{indicator}").as_str()).as_ref());
-    let right_width = measure_text_width(strip_ansi_codes(right).as_ref());
+    let left_width = visible_width(&format!("{first_line}{indicator}"));
+    let right_width = visible_width(right);
     left_width + RIGHT_PROMPT_MIN_INPUT_ROOM + right_width <= cols
 }
 
-fn render_right_prompt(right: &str) -> String {
-    let width = measure_text_width(strip_ansi_codes(right).as_ref());
-    format!("\x1b[s\x1b[999C\x1b[{width}D{right}\x1b[K\x1b[u")
+/// Positions the right-aligned status segment with pure relative cursor
+/// moves. `\x1b[s` / `\x1b[u` save/restore are ignored by several terminal
+/// configurations (notably some ssh/tmux setups), which repainted every
+/// prompt as a second copy appended to the same row; `CUF`/`CR` are
+/// universally supported.
+///
+/// `input_cols` is the visible width of the prompt line hosting the segment;
+/// the cursor sits at that column when the returned escapes execute.
+///
+/// Returns `None` when the segment would not fit (caller renders left-only).
+fn render_right_prompt(right: &str, input_cols: usize, term_cols: usize) -> Option<String> {
+    let right_width = visible_width(right);
+    let gap = term_cols.checked_sub(input_cols.checked_add(right_width)?)?;
+    if gap < 1 {
+        return None;
+    }
+    // Forward past the typing area, paint + clear through end of line,
+    // then return to the exact input column.
+    Some(format!("\x1b[{gap}C{right}\x1b[K\r\x1b[{input_cols}C"))
+}
+
+/// Visible width of `text` with ANSI styling stripped.
+fn visible_width(text: &str) -> usize {
+    measure_text_width(strip_ansi_codes(text).as_ref())
 }
 
 struct ResponsivePrompt {
@@ -444,8 +485,8 @@ mod tests {
         let actual = render_prompt_with_width(&prompt, Some(40));
 
         assert!(
-            !actual.styled.contains("\u{1b}[s"),
-            "right prompt cursor-save escape must be absent on narrow terminals: {:?}",
+            !actual.styled.contains("\u{1b}[K"),
+            "right-prompt clear-to-EOL escape must be absent on narrow terminals: {:?}",
             actual.styled
         );
     }
@@ -461,20 +502,37 @@ mod tests {
 
         let actual = render_prompt_with_width(&fixture, Some(120));
 
-        assert!(actual.styled.contains("\u{1b}[s"));
+        // Positioned with relative cursor moves, not save/restore: ignored
+        // `\x1b[s`/`\x1b[u` sequences made prompts concatenate on one row.
+        assert!(actual.styled.contains("\u{1b}[K"));
+        assert!(!actual.styled.contains("\u{1b}[s"));
+        assert!(actual.styled.contains('\r'));
     }
 
     #[test]
-    fn test_right_prompt_kept_when_width_unknown() {
+    fn test_right_prompt_suppressed_when_width_unknown() {
         use std::path::PathBuf;
 
         use aimee_api::{AgentId, ModelId};
 
+        // Without a measurable width the cursor-move geometry cannot be
+        // trusted and escapes must not leak into piped output.
         let mut fixture = AimeePrompt::new(PathBuf::from("project"), AgentId::default());
         let _ = fixture.model(ModelId::new("anthropic/claude-opus-4"));
 
         let actual = render_prompt_with_width(&fixture, None);
 
-        assert!(actual.styled.contains("\u{1b}[s"));
+        assert!(!actual.styled.contains("\u{1b}[K"));
+    }
+
+    #[test]
+    fn test_render_right_prompt_returns_to_input_column() {
+        // gap + right + clear, then CR back to the input column.
+        let actual = render_right_prompt("STATUS", 20, 100);
+        let expected = Some("\u{1b}[74CSTATUS\u{1b}[K\r\u{1b}[20C".to_string());
+        assert_eq!(actual, expected);
+        // Segment that cannot fit → caller renders left-only.
+        let actual = render_right_prompt("STATUS", 95, 100);
+        assert_eq!(actual, None);
     }
 }

@@ -4166,7 +4166,16 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
     /// Creates AimeeCodes Services credentials if not already authenticated and
     /// displays the credentials file location to the user.
     async fn init_aimee_services(&mut self) -> Result<()> {
-        self.api.create_auth_credentials().await?;
+        if let Err(error) = self.api.create_auth_credentials().await {
+            // The indexing service is optional: an unreachable endpoint (e.g.
+            // offline, DNS failure) must degrade to a warning, not abort the
+            // session or provider setup.
+            self.writeln_title(TitleFormat::warning(format!(
+                "AimeeCodes Services unavailable — continuing without indexing ({})",
+                error
+            )))?;
+            return Ok(());
+        }
         let env = self.api.environment();
         let credentials_path = crate::info::format_path_for_display(&env, &env.credentials_path());
         self.writeln_title(
@@ -4718,6 +4727,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
     }
 
     async fn on_chat(&mut self, chat: ChatRequest) -> Result<()> {
+        self.state.turn_reply.clear();
+        self.state.turn_activity = 0;
         let mut stream = self.api.chat(chat).await?;
 
         // Always use streaming content writer
@@ -4851,6 +4862,7 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
             ChatResponse::TaskMessage { content } => match content {
                 ChatResponseContent::ToolInput(title) => {
                     writer.finish()?;
+                    self.state.turn_activity = self.state.turn_activity.saturating_add(1);
                     self.writeln(title.display())?;
                 }
                 ChatResponseContent::ToolOutput(text) => {
@@ -4868,9 +4880,11 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
                         })
                         .collect::<Vec<_>>()
                         .join("\n");
+                    self.state.turn_activity = self.state.turn_activity.saturating_add(1);
                     self.writeln(indented)?;
                 }
                 ChatResponseContent::Markdown { text, partial: _ } => {
+                    self.state.turn_reply.push_str(&text);
                     writer.write(&text)?;
                 }
             },
@@ -4887,6 +4901,7 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
                 let _guard = NotifyGuard(&notifier);
 
                 writer.finish()?;
+                self.state.turn_activity = self.state.turn_activity.saturating_add(1);
 
                 // Stop spinner only for tools that require stdout/stderr access
                 if tool_call.requires_stdout() {
@@ -5012,7 +5027,15 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
     }
 
     async fn maybe_continue_goal(&mut self) -> anyhow::Result<()> {
-        let reply = self.last_assistant_text().await.unwrap_or_default();
+        // Prefer what this turn actually streamed: the persisted conversation
+        // can lag the stream, which made tool-only turns read as "no output"
+        // and stalled the loop.
+        let streamed = self.state.turn_reply.trim().to_string();
+        let reply = if streamed.is_empty() {
+            self.last_assistant_text().await.unwrap_or_default()
+        } else {
+            streamed
+        };
         if let Some(verdict) = self.state.goal.judge(&reply)?
             && verdict.complete
         {
@@ -5023,10 +5046,18 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(AimeeConfig) -> A + Send + Sync> UI
             return Ok(());
         }
         if reply.trim().is_empty() {
-            self.writeln_title(TitleFormat::info(
-                "/goal: last turn produced no output — not auto-continuing",
-            ))?;
-            return Ok(());
+            if self.state.turn_activity > 0 {
+                // Tool-only turn (no closing prose): work happened, keep
+                // looping. The judge fails open on empty replies.
+                self.writeln_title(TitleFormat::debug(
+                    "/goal: no prose this turn — continuing after tool activity",
+                ))?;
+            } else {
+                self.writeln_title(TitleFormat::info(
+                    "/goal: last turn produced no output — not auto-continuing",
+                ))?;
+                return Ok(());
+            }
         }
         let _ = self.state.goal.tick();
         let Some(prompt) = self.state.goal.continuation_prompt() else {
