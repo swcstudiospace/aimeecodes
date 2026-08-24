@@ -12,12 +12,13 @@ pub fn release_npm_job() -> Job {
                 .uses("actions", "checkout", "v6")
                 .add_with(("repository", "${{ matrix.repository }}"))
                 .add_with(("ref", "main"))
+                .add_with(("path", "npm-aimee-codes"))
                 .add_with(("token", "${{ secrets.NPM_ACCESS }}")),
         )
         // Make script executable and run it with token
         .add_step(
             Step::new("Update NPM Package")
-                .run("./update-package.sh ${{ github.event.release.tag_name }}")
+                .run("cd npm-aimee-codes && ./update-package.sh ${{ github.event.release.tag_name }}")
                 .add_env(("AUTO_PUSH", "true"))
                 .add_env(("CI", "true"))
                 .add_env(("NPM_TOKEN", "${{ secrets.NPM_TOKEN }}")),

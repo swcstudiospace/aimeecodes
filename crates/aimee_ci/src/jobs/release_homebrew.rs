@@ -7,10 +7,11 @@ pub fn release_homebrew_job() -> Job {
             Step::new("Checkout Code").uses("actions", "checkout", "v6")
                 .add_with(("repository", "swcstudiospace/homebrew-aimee-codes"))
                 .add_with(("ref", "main"))
+                .add_with(("path", "homebrew-aimee-codes"))
                 .add_with(("token", "${{ secrets.HOMEBREW_ACCESS }}")),
         )
         // Make script executable and run it with token
         .add_step(
-            Step::new("Update Homebrew Formula").run("GITHUB_TOKEN=\"${{ secrets.HOMEBREW_ACCESS }}\" ./update-formula.sh ${{ github.event.release.tag_name }}"),
+            Step::new("Update Homebrew Formula").run("cd homebrew-aimee-codes && GITHUB_TOKEN=\"${{ secrets.HOMEBREW_ACCESS }}\" ./update-formula.sh ${{ github.event.release.tag_name }}"),
         )
 }

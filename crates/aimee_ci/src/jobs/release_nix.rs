@@ -10,11 +10,12 @@ pub fn release_nix_job() -> Job {
                 .uses("actions", "checkout", "v6")
                 .add_with(("repository", "swcstudiospace/nix-aimee-codes"))
                 .add_with(("ref", "main"))
+                .add_with(("path", "nix-aimee-codes"))
                 .add_with(("token", "${{ secrets.NIX_ACCESS }}")),
         )
         .add_step(
             Step::new("Update Nix Flake")
-                .run("./update-flake.sh ${{ github.event.release.tag_name }}")
+                .run("cd nix-aimee-codes && ./update-flake.sh ${{ github.event.release.tag_name }}")
                 .add_env(("AUTO_PUSH", "true"))
                 .add_env(("CI", "true")),
         )
@@ -32,6 +33,10 @@ mod tests {
         assert_eq!(
             actual["steps"][0]["with"]["repository"].as_str(),
             Some(expected)
+        );
+        assert_eq!(
+            actual["steps"][0]["with"]["path"].as_str(),
+            Some("nix-aimee-codes")
         );
     }
 }

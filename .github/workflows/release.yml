@@ -131,9 +131,10 @@ jobs:
       with:
         repository: ${{ matrix.repository }}
         ref: main
+        path: npm-aimee-codes
         token: ${{ secrets.NPM_ACCESS }}
     - name: Update NPM Package
-      run: './update-package.sh ${{ github.event.release.tag_name }}'
+      run: cd npm-aimee-codes && ./update-package.sh ${{ github.event.release.tag_name }}
       env:
         AUTO_PUSH: 'true'
         CI: 'true'
@@ -149,9 +150,10 @@ jobs:
       with:
         repository: swcstudiospace/homebrew-aimee-codes
         ref: main
+        path: homebrew-aimee-codes
         token: ${{ secrets.HOMEBREW_ACCESS }}
     - name: Update Homebrew Formula
-      run: GITHUB_TOKEN="${{ secrets.HOMEBREW_ACCESS }}" ./update-formula.sh ${{ github.event.release.tag_name }}
+      run: cd homebrew-aimee-codes && GITHUB_TOKEN="${{ secrets.HOMEBREW_ACCESS }}" ./update-formula.sh ${{ github.event.release.tag_name }}
   nix_release:
     needs:
     - build_release
@@ -163,9 +165,10 @@ jobs:
       with:
         repository: swcstudiospace/nix-aimee-codes
         ref: main
+        path: nix-aimee-codes
         token: ${{ secrets.NIX_ACCESS }}
     - name: Update Nix Flake
-      run: './update-flake.sh ${{ github.event.release.tag_name }}'
+      run: cd nix-aimee-codes && ./update-flake.sh ${{ github.event.release.tag_name }}
       env:
         AUTO_PUSH: 'true'
         CI: 'true'
@@ -180,9 +183,10 @@ jobs:
       with:
         repository: swcstudiospace/deno-aimee-codes
         ref: main
+        path: deno-aimee-codes
         token: ${{ secrets.DENO_ACCESS }}
     - name: Update Deno Launcher Package
-      run: './update-deno.sh ${{ github.event.release.tag_name }}'
+      run: cd deno-aimee-codes && ./update-deno.sh ${{ github.event.release.tag_name }}
       env:
         AUTO_PUSH: 'true'
         CI: 'true'

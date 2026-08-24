@@ -9,11 +9,12 @@ pub fn release_deno_job() -> Job {
                 .uses("actions", "checkout", "v6")
                 .add_with(("repository", "swcstudiospace/deno-aimee-codes"))
                 .add_with(("ref", "main"))
+                .add_with(("path", "deno-aimee-codes"))
                 .add_with(("token", "${{ secrets.DENO_ACCESS }}")),
         )
         .add_step(
             Step::new("Update Deno Launcher Package")
-                .run("./update-deno.sh ${{ github.event.release.tag_name }}")
+                .run("cd deno-aimee-codes && ./update-deno.sh ${{ github.event.release.tag_name }}")
                 .add_env(("AUTO_PUSH", "true"))
                 .add_env(("CI", "true"))
                 .add_env(("JSR_TOKEN", "${{ secrets.JSR_TOKEN }}"))
@@ -33,6 +34,10 @@ mod tests {
         assert_eq!(
             actual["steps"][0]["with"]["repository"].as_str(),
             Some(expected)
+        );
+        assert_eq!(
+            actual["steps"][0]["with"]["path"].as_str(),
+            Some("deno-aimee-codes")
         );
     }
 }
