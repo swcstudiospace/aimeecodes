@@ -1,0 +1,66 @@
+# Docker Compose orchestrator for the Aimee Codes Dev Container.
+#
+# The primary service is `workspace`. There is no database sidecar: persistence
+# is SQLite inside the product (`crates/aimee_repo`), not Postgres.
+#
+# Cache volumes cover cargo registry/git and npm only. Do not volume-mount
+# CARGO_HOME, RUSTUP_HOME, or /usr/local/cargo/bin — an empty volume would
+# hide the Feature-installed toolchain. Do not mount `target/` (stale
+# artifacts across rebuilds). Do not bind-mount ~/.aimee (credentials).
+#
+# docker-outside-of-docker is intentionally absent: untrusted agent PRs must
+# not control the host engine. Nested `aimee pod` from inside this container
+# is not supported.
+
+name: aimeecodes
+
+services:
+  workspace:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USERNAME: vscode
+      cache_from:
+        - ghcr.io/swcstudiospace/omegaloops/devcontainer:latest
+    image: aimeecodes-devcontainer:local
+    hostname: aimeecodes-dev
+    init: true
+    privileged: false
+    user: vscode
+    working_dir: /workspaces/aimeecodes
+    command: sleep infinity
+    stdin_open: true
+    tty: true
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp=unconfined
+      - label=disable
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    environment:
+      APP_VERSION: 0.1.0-dev
+      SHELL: /bin/zsh
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      TZ: UTC
+      HISTFILE: /commandhistory/.zsh_history
+    volumes:
+      - ..:/workspaces/aimeecodes:cached
+      - aimeecodes-cargo-registry:/usr/local/cargo/registry
+      - aimeecodes-cargo-git:/usr/local/cargo/git
+      - aimeecodes-npm:/home/vscode/.npm
+      - aimeecodes-commandhistory:/commandhistory
+    # Credentials stay on the host. Do not uncomment in shared or untrusted trees.
+    # - ${HOME}/.aimee:/home/vscode/.aimee:ro
+
+volumes:
+  aimeecodes-cargo-registry:
+  aimeecodes-cargo-git:
+  aimeecodes-npm:
+  aimeecodes-commandhistory:

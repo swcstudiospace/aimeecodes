@@ -1,0 +1,7 @@
+# Build context is this directory (not the repo root). Keep the image layer
+# free of lifecycle scripts and Feature sources that Features copy themselves.
+**/.git
+**/.gitignore
+**/README.md
+**/NOTICE
+**/*.swp

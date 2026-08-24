@@ -362,7 +362,7 @@ cargo clippy -p aimee_main --all-targets -- -D warnings
 cargo insta test --accept -p aimee_main
 ```
 
-Nix: `nix run github:swcstudiospace/omegaloops` or `nix develop`. CI sets `RUSTFLAGS=-D warnings`. House rules for agents: `AGENTS.md`.
+Nix: `nix run github:swcstudiospace/omegaloops` or `nix develop`. Dev Container (VS Code, Codespaces, DevPod / `aimee pod`): `.devcontainer/`. CI sets `RUSTFLAGS=-D warnings`. House rules for agents: `AGENTS.md`.
 
 Do not commit secrets, `.env` files, or `target/`.
 

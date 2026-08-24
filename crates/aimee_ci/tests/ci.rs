@@ -39,3 +39,8 @@ fn test_bounty_workflow() {
 fn test_coderabbit_workflow() {
     workflow::generate_coderabbit_workflow();
 }
+
+#[test]
+fn test_devcontainer_workflow() {
+    workflow::generate_devcontainer_workflow();
+}

@@ -1,0 +1,24 @@
+{
+  "id": "aimee-toolchain",
+  "version": "1.0.0",
+  "name": "Aimee Codes toolchain extras",
+  "description": "protoc 28.3 (Cross.toml pin), fzf, fd, ripgrep, and jq. Native compile deps live in the Dockerfile; Rust/Node/GitHub CLI are official Features.",
+  "documentationURL": "https://github.com/swcstudiospace/omegaloops/tree/main/.devcontainer",
+  "licenseURL": "https://github.com/swcstudiospace/omegaloops/blob/main/LICENSE",
+  "keywords": ["aimee", "protobuf", "protoc", "rust", "sqlite"],
+  "options": {
+    "protocVersion": {
+      "type": "string",
+      "default": "28.3",
+      "description": "GitHub protocolbuffers/protobuf release tag without the leading v. Must match Cross.toml (v28.3).",
+      "proposals": ["28.3"]
+    }
+  },
+  "containerEnv": {
+    "PROTOC": "/usr/local/bin/protoc",
+    "PROTOC_INCLUDE": "/usr/local/include"
+  },
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/common-utils"
+  ]
+}

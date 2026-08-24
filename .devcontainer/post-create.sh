@@ -4,9 +4,6 @@
 # (cargo-nextest refuses unlocked source installs).
 set -euo pipefail
 
-sudo apt-get update
-sudo apt-get install -y fzf fd-find
-
 if [[ -f rust-toolchain.toml ]]; then
   rustup show
 fi
@@ -15,3 +12,4 @@ rustup component add clippy rustfmt
 # Required for the repo's nextest/insta workflow. --locked is mandatory for nextest.
 cargo install --locked cargo-nextest
 cargo install cargo-insta
+cargo install cargo-llvm-cov

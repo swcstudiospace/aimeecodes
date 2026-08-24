@@ -1,17 +1,58 @@
 {
+  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
   "name": "Aimee Codes",
-  "image": "mcr.microsoft.com/devcontainers/rust:2-1-bullseye",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "workspace",
+  "runServices": ["workspace"],
+  "workspaceFolder": "/workspaces/aimeecodes",
+  "shutdownAction": "stopCompose",
+  "overrideCommand": false,
+  "privileged": false,
+  "init": true,
   "remoteUser": "vscode",
+  "containerUser": "vscode",
   "updateRemoteUserUID": true,
+  "userEnvProbe": "loginInteractiveShell",
+  "waitFor": "updateContentCommand",
+  "hostRequirements": {
+    "cpus": 8,
+    "memory": "16gb",
+    "storage": "64gb"
+  },
+  "capAdd": ["SYS_PTRACE"],
+  "securityOpt": ["seccomp=unconfined"],
+  "forwardPorts": [4173, 8091],
+  "portsAttributes": {
+    "4173": {
+      "label": "PWA static shell (python3 -m http.server)",
+      "onAutoForward": "silent"
+    },
+    "8091": {
+      "label": "Anda KIP nexus (local default)",
+      "onAutoForward": "silent"
+    }
+  },
+  "otherPortsAttributes": {
+    "onAutoForward": "silent"
+  },
+  "containerEnv": {
+    "SHELL": "/bin/zsh",
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "TZ": "UTC",
+    "APP_VERSION": "0.1.0-dev",
+    "PROTOC": "/usr/local/bin/protoc",
+    "PROTOC_INCLUDE": "/usr/local/include",
+    "CARGO_TERM_COLOR": "always",
+    "HISTFILE": "/commandhistory/.zsh_history"
+  },
+  "remoteEnv": {
+    "APP_VERSION": "0.1.0-dev",
+    "RUST_BACKTRACE": "1",
+    "CARGO_TERM_COLOR": "always",
+    "EDITOR": "vim"
+  },
   "features": {
-    "ghcr.io/devcontainers/features/node:2": {
-      "version": "lts"
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/git:1": {
-      "ppa": true,
-      "version": "latest"
-    },
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": true,
       "installOhMyZsh": true,
@@ -19,27 +60,101 @@
       "username": "vscode",
       "uid": "automatic",
       "gid": "automatic"
-    }
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "ppa": true,
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/node:2": {
+      "version": "24"
+    },
+    "ghcr.io/devcontainers/features/rust:1": {
+      "version": "1.97",
+      "profile": "default",
+      "components": "rust-analyzer,rust-src,rustfmt,clippy"
+    },
+    "./features/aimee-toolchain": {
+      "protocVersion": "28.3"
+    },
+    "ghcr.io/devcontainers/features/sshd:1": {}
   },
-  "containerEnv": {
-    "SHELL": "/usr/bin/zsh"
+  "overrideFeatureInstallOrder": [
+    "ghcr.io/devcontainers/features/common-utils",
+    "ghcr.io/devcontainers/features/git",
+    "ghcr.io/devcontainers/features/github-cli",
+    "ghcr.io/devcontainers/features/node",
+    "ghcr.io/devcontainers/features/rust",
+    "./features/aimee-toolchain",
+    "ghcr.io/devcontainers/features/sshd"
+  ],
+  "initializeCommand": "bash .devcontainer/initialize.sh",
+  "onCreateCommand": "bash .devcontainer/on-create.sh",
+  "updateContentCommand": {
+    "cargo-fetch": ["bash", ".devcontainer/update-content.sh", "cargo"],
+    "npm-ci": ["bash", ".devcontainer/update-content.sh", "npm"]
   },
   "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postStartCommand": "bash .devcontainer/post-start.sh",
+  "postAttachCommand": "bash .devcontainer/post-attach.sh",
   "customizations": {
     "vscode": {
       "extensions": [
         "rust-lang.rust-analyzer",
         "tamasfe.even-better-toml",
-        "vadimcn.vscode-lldb"
+        "vadimcn.vscode-lldb",
+        "fill-labs.dependi",
+        "zxh404.vscode-proto3",
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-docker",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "jnoortheen.nix-ide",
+        "ms-python.python",
+        "EditorConfig.EditorConfig"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "zsh",
         "terminal.integrated.profiles.linux": {
           "zsh": {
-            "path": "/usr/bin/zsh"
+            "path": "/bin/zsh"
           }
-        }
+        },
+        "terminal.integrated.fontFamily": "'IBM Plex Mono', 'JetBrains Mono', monospace",
+        "terminal.integrated.fontSize": 14,
+        "editor.formatOnSave": true,
+        "editor.rulers": [100],
+        "[rust]": {
+          "editor.defaultFormatter": "rust-lang.rust-analyzer"
+        },
+        "rust-analyzer.procMacro.enable": true,
+        "rust-analyzer.cargo.buildScripts.enable": true,
+        "rust-analyzer.cargo.buildScripts.invocationStrategy": "per_workspace",
+        "rust-analyzer.cargo.buildScripts.invocationLocation": "workspace",
+        "rust-analyzer.cargo.allTargets": false,
+        "rust-analyzer.cargo.allFeatures": true,
+        "rust-analyzer.check.command": "clippy",
+        "rust-analyzer.check.extraArgs": ["--", "-D", "warnings"],
+        "files.watcherExclude": {
+          "**/target/**": true,
+          "**/node_modules/**": true
+        },
+        "search.exclude": {
+          "**/target": true,
+          "**/node_modules": true
+        },
+        "github.copilot.chat.codeGeneration.instructions": [
+          {
+            "text": "Follow AGENTS.md. Rust 2024 workspace, MSRV 1.94, pin 1.97. Do not cargo build --release. Tests name fixture/actual/expected and assert equality with pretty_assertions. Never commit secrets, .env, or target/."
+          }
+        ]
       }
+    },
+    "codespaces": {
+      "openFiles": ["README.md", "AGENTS.md"]
+    },
+    "jetbrains": {
+      "backend": "RustRover"
     }
   }
 }
