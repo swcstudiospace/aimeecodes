@@ -41,6 +41,7 @@ pub fn humanize_number(n: usize) -> String {
 /// regardless of the real width. This probes stdout first (the surface the
 /// UI paints on), then stderr (where the spinner draws), accepting a size
 /// whose column count is positive even when rows is 0.
+#[cfg(unix)]
 pub fn terminal_columns() -> Option<usize> {
     for fd in [libc::STDOUT_FILENO, libc::STDERR_FILENO] {
         let mut winsize = libc::winsize { ws_row: 0, ws_col: 0, ws_xpixel: 0, ws_ypixel: 0 };
@@ -51,6 +52,13 @@ pub fn terminal_columns() -> Option<usize> {
         }
     }
     None
+}
+
+/// Windows fallback: the raw `TIOCGWINSZ` probe is Unix-only. Zero-row ptys
+/// are a Unix quirk, so the `terminal_size` crate's console API suffices.
+#[cfg(not(unix))]
+pub fn terminal_columns() -> Option<usize> {
+    terminal_size::terminal_size().map(|(width, _)| width.0 as usize)
 }
 
 #[cfg(test)]
