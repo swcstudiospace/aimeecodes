@@ -1,7 +1,7 @@
 use gh_workflow::generate::Generate;
 use gh_workflow::*;
 
-use crate::jobs::{ReleaseBuilderJob, release_homebrew_job, release_npm_job};
+use crate::jobs::{ReleaseBuilderJob, release_deno_job, release_homebrew_job, release_nix_job, release_npm_job};
 
 /// Generate npm release workflow
 pub fn release_publish() {
@@ -9,6 +9,8 @@ pub fn release_publish() {
         .release_id("${{ github.event.release.id }}");
     let npm_release_job = release_npm_job().add_needs("build_release");
     let homebrew_release_job = release_homebrew_job().add_needs("build_release");
+    let nix_release_job = release_nix_job().add_needs("build_release");
+    let deno_release_job = release_deno_job().add_needs("build_release");
 
     let npm_workflow = Workflow::default()
         .name("Multi Channel Release")
@@ -23,7 +25,9 @@ pub fn release_publish() {
         )
         .add_job("build_release", release_build_job.into_job())
         .add_job("npm_release", npm_release_job)
-        .add_job("homebrew_release", homebrew_release_job);
+        .add_job("homebrew_release", homebrew_release_job)
+        .add_job("nix_release", nix_release_job)
+        .add_job("deno_release", deno_release_job);
 
     Generate::new(npm_workflow)
         .name("release.yml")

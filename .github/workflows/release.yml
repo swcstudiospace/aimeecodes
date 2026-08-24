@@ -147,8 +147,44 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v6
       with:
-        repository: antinomyhq/homebrew-aimee-codes
+        repository: swcstudiospace/homebrew-aimee-codes
         ref: main
         token: ${{ secrets.HOMEBREW_ACCESS }}
     - name: Update Homebrew Formula
       run: GITHUB_TOKEN="${{ secrets.HOMEBREW_ACCESS }}" ./update-formula.sh ${{ github.event.release.tag_name }}
+  nix_release:
+    needs:
+    - build_release
+    name: nix_release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v6
+      with:
+        repository: swcstudiospace/nix-aimee-codes
+        ref: main
+        token: ${{ secrets.NIX_ACCESS }}
+    - name: Update Nix Flake
+      run: './update-flake.sh ${{ github.event.release.tag_name }}'
+      env:
+        AUTO_PUSH: 'true'
+        CI: 'true'
+  deno_release:
+    needs:
+    - build_release
+    name: deno_release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v6
+      with:
+        repository: swcstudiospace/deno-aimee-codes
+        ref: main
+        token: ${{ secrets.DENO_ACCESS }}
+    - name: Update Deno Launcher Package
+      run: './update-deno.sh ${{ github.event.release.tag_name }}'
+      env:
+        AUTO_PUSH: 'true'
+        CI: 'true'
+        JSR_TOKEN: ${{ secrets.JSR_TOKEN }}
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
