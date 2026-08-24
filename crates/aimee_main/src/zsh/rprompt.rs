@@ -490,7 +490,9 @@ mod tests {
         assert!(!no_window.contains("ctx "));
 
         // Window set but zero tokens (inactive) → still hidden.
-        let inactive = ZshRPrompt::default().context_window(Some(100_000)).to_string();
+        let inactive = ZshRPrompt::default()
+            .context_window(Some(100_000))
+            .to_string();
         assert!(!inactive.contains("ctx "));
     }
 

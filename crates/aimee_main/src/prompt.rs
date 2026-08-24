@@ -494,10 +494,8 @@ mod tests {
             total_tokens: aimee_api::TokenCount::Actual(2_000),
             ..Default::default()
         };
-        let mut prompt = AimeePrompt::default();
+        let mut prompt = AimeePrompt { context_window: Some(100_000), ..AimeePrompt::default() };
         let _ = prompt.usage(usage);
-        prompt.context_window = Some(100_000);
-
         let actual = prompt.render_prompt_right();
         assert!(actual.contains("ctx 2%"));
     }
@@ -519,8 +517,7 @@ mod tests {
     #[test]
     fn test_render_prompt_right_hides_context_when_inactive() {
         // Window known but zero tokens → inactive prompt stays dim and bare.
-        let mut prompt = AimeePrompt::default();
-        prompt.context_window = Some(100_000);
+        let prompt = AimeePrompt { context_window: Some(100_000), ..AimeePrompt::default() };
 
         let actual = prompt.render_prompt_right();
         assert!(!actual.contains("ctx "));

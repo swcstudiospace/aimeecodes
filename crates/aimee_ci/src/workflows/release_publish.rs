@@ -1,7 +1,9 @@
 use gh_workflow::generate::Generate;
 use gh_workflow::*;
 
-use crate::jobs::{ReleaseBuilderJob, release_deno_job, release_homebrew_job, release_nix_job, release_npm_job};
+use crate::jobs::{
+    ReleaseBuilderJob, release_deno_job, release_homebrew_job, release_nix_job, release_npm_job,
+};
 
 /// Generate npm release workflow
 pub fn release_publish() {
