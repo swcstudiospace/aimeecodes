@@ -80,7 +80,7 @@ jobs:
           target: aarch64-linux-android
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Setup Protobuf Compiler
       if: ${{ matrix.cross == 'false' }}
       uses: arduino/setup-protoc@v3
@@ -127,7 +127,7 @@ jobs:
         - swcstudiospace/npm-aimee-codes
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         repository: ${{ matrix.repository }}
         ref: main
@@ -146,7 +146,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         repository: swcstudiospace/homebrew-aimee-codes
         ref: main
@@ -161,7 +161,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         repository: swcstudiospace/nix-aimee-codes
         ref: main
@@ -179,7 +179,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         repository: swcstudiospace/deno-aimee-codes
         ref: main
