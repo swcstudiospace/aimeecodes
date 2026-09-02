@@ -34,7 +34,7 @@ jobs:
       pull-requests: write
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Install CodeRabbit CLI
       run: curl -fsSL https://cli.coderabbit.ai/install.sh | sh
     - name: Review and comment
